@@ -1,0 +1,17 @@
+{
+  "type": "banditboard-sponsorboard",
+  "version": 1,
+  "name": "Eksempel – lokale sponsorer",
+  "cat": "billard",
+  "style": "galleri",
+  "title": "Sponsor galleri",
+  "sub": "Tak til vores sponsorer",
+  "names": [
+    "Sanderum Pubben",
+    "Ullerslev Pub",
+    "City Café",
+    "Global Transport",
+    "Pro-Kø",
+    "Stream Services"
+  ]
+}

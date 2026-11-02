@@ -1,0 +1,120 @@
+{
+ "generated": "2026-09-29T17:20:40.457Z",
+ "medier": [
+  {
+   "name": "billard",
+   "cats": {
+    "logoer": [
+     {
+      "name": "klub-eksempel.svg",
+      "path": "billard/logoer/klub-eksempel.svg",
+      "url": "/medier/billard/logoer/klub-eksempel.svg"
+     }
+    ],
+    "sponsorer": [
+     {
+      "name": "city-cafe.svg",
+      "path": "billard/sponsorer/city-cafe.svg",
+      "url": "/medier/billard/sponsorer/city-cafe.svg"
+     },
+     {
+      "name": "dansk-sportsudstyr.svg",
+      "path": "billard/sponsorer/dansk-sportsudstyr.svg",
+      "url": "/medier/billard/sponsorer/dansk-sportsudstyr.svg"
+     },
+     {
+      "name": "global-transport.svg",
+      "path": "billard/sponsorer/global-transport.svg",
+      "url": "/medier/billard/sponsorer/global-transport.svg"
+     },
+     {
+      "name": "pro-koe.svg",
+      "path": "billard/sponsorer/pro-koe.svg",
+      "url": "/medier/billard/sponsorer/pro-koe.svg"
+     },
+     {
+      "name": "sanderum-pubben.png",
+      "path": "billard/sponsorer/sanderum-pubben.png",
+      "url": "/medier/billard/sponsorer/sanderum-pubben.png"
+     },
+     {
+      "name": "stream-services.svg",
+      "path": "billard/sponsorer/stream-services.svg",
+      "url": "/medier/billard/sponsorer/stream-services.svg"
+     },
+     {
+      "name": "ullerslev-pub.png",
+      "path": "billard/sponsorer/ullerslev-pub.png",
+      "url": "/medier/billard/sponsorer/ullerslev-pub.png"
+     }
+    ],
+    "baand": [
+     {
+      "name": "navy-boerstet.svg",
+      "path": "billard/baand/navy-boerstet.svg",
+      "url": "/medier/billard/baand/navy-boerstet.svg"
+     }
+    ],
+    "baggrunde": [],
+    "designs": [
+     {
+      "name": "klubfarver-bordeaux.json",
+      "path": "billard/designs/klubfarver-bordeaux.json",
+      "url": "/medier/billard/designs/klubfarver-bordeaux.json"
+     }
+    ],
+    "sponsorboards": [
+     {
+      "name": "eksempel-sponsorgalleri.json",
+      "path": "billard/sponsorboards/eksempel-sponsorgalleri.json",
+      "url": "/medier/billard/sponsorboards/eksempel-sponsorgalleri.json"
+     }
+    ]
+   }
+  },
+  {
+   "name": "dart",
+   "cats": {
+    "logoer": [],
+    "sponsorer": [],
+    "baand": [],
+    "baggrunde": [],
+    "designs": [
+     {
+      "name": "dart-groen-sort.json",
+      "path": "dart/designs/dart-groen-sort.json",
+      "url": "/medier/dart/designs/dart-groen-sort.json"
+     }
+    ],
+    "sponsorboards": []
+   }
+  },
+  {
+   "name": "fodbold",
+   "cats": {
+    "logoer": [],
+    "sponsorer": [],
+    "baand": [],
+    "baggrunde": [],
+    "designs": [
+     {
+      "name": "stadion-groen.json",
+      "path": "fodbold/designs/stadion-groen.json",
+      "url": "/medier/fodbold/designs/stadion-groen.json"
+     }
+    ],
+    "sponsorboards": []
+   }
+  },
+  {
+   "name": "faelles",
+   "cats": {
+    "logoer": [],
+    "sponsorer": [],
+    "baand": [],
+    "baggrunde": []
+   }
+  }
+ ],
+ "brand": "/branding/logo.png"
+}

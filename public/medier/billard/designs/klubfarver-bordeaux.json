@@ -1,0 +1,21 @@
+{
+  "type": "banditboard-design",
+  "version": 1,
+  "name": "Klubfarver – bordeaux",
+  "cat": "billard",
+  "tpl": "classic",
+  "c": {
+    "m1": "#5a1a2a",
+    "m2": "#3a0f1a",
+    "m3": "#1c070d",
+    "ac": "#c9a24a",
+    "lt": "#f3dc9a",
+    "s1": "#fff4d6",
+    "s2": "#c9a24a",
+    "tx": "#ffffff",
+    "st": "#ecd6d9",
+    "b1": "#2a0d14",
+    "b2": "#12050a",
+    "bt": "#f3dc9a"
+  }
+}

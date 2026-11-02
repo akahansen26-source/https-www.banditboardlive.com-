@@ -1,0 +1,11 @@
+MEDIEMAPPE TIL BANDITBOARD LIVE
+Læg billeder (png, jpg, webp, svg, gif) i mapperne her. BanditBoard Live ser dem selv efter et par sekunder.
+
+  <sportsgren>/logoer      klub- og holdlogoer
+  <sportsgren>/sponsorer   sponsorlogoer til sponsorbåndet
+  <sportsgren>/baand       baggrunde til overlay-båndet
+  <sportsgren>/baggrunde   andre baggrunde
+
+Ny sportsgren: opret en ny mappe (fx "padel") med de samme undermapper.
+Udskift et logo: læg en ny fil med samme navn ovenpå den gamle.
+Vælg hvad der vises under fanen "Medier" i BanditBoard Live.

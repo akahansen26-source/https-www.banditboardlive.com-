@@ -1,0 +1,21 @@
+{
+  "type": "banditboard-design",
+  "version": 1,
+  "name": "Dart – grøn/sort",
+  "cat": "dart",
+  "tpl": "classic",
+  "c": {
+    "m1": "#0f3d22",
+    "m2": "#0a2415",
+    "m3": "#040c07",
+    "ac": "#2fbf5f",
+    "lt": "#e23b3b",
+    "s1": "#ffffff",
+    "s2": "#9ef0b8",
+    "tx": "#ffffff",
+    "st": "#cfe9d8",
+    "b1": "#141414",
+    "b2": "#050505",
+    "bt": "#f2f2f2"
+  }
+}

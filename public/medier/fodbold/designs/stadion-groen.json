@@ -1,0 +1,21 @@
+{
+  "type": "banditboard-design",
+  "version": 1,
+  "name": "Stadion – grøn/hvid",
+  "cat": "fodbold",
+  "tpl": "classic",
+  "c": {
+    "m1": "#1f7a3a",
+    "m2": "#135a28",
+    "m3": "#0a3317",
+    "ac": "#ffffff",
+    "lt": "#ffe066",
+    "s1": "#ffffff",
+    "s2": "#d9f5e0",
+    "tx": "#ffffff",
+    "st": "#dff3e5",
+    "b1": "#f4f6f5",
+    "b2": "#c9d3cd",
+    "bt": "#0f3d20"
+  }
+}
