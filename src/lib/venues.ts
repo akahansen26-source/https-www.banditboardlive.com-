@@ -65,10 +65,13 @@ function draft(input: VenueDraft, withEmail: boolean): VenueDraft {
   };
 }
 
+/** Godtager "facebook.com/side", "www…" og http:// – og gør dem til et https-link. */
 function safeUrl(value: unknown): string {
-  const url = clip(value, 300);
+  let url = clip(value, 300).replace(/\s+/g, "");
   if (!url) return "";
-  if (!/^https:\/\/[^\s]+$/i.test(url)) throw new Error("Links skal starte med https://");
+  url = url.replace(/^http:\/\//i, "https://");
+  if (!/^https:\/\//i.test(url)) url = `https://${url.replace(/^\/+/, "")}`;
+  if (!/^https:\/\/[^\s/.]+(\.[^\s/.]+)+(\/[^\s]*)?$/i.test(url)) throw new Error(`"${clip(value, 60)}" ligner ikke et link. Skriv fx facebook.com/jeresside`);
   return url;
 }
 
@@ -228,7 +231,11 @@ export const saveSiteSettings = createServerFn({ method: "POST" })
     facebook: safeUrl(input?.facebook),
     instagram: safeUrl(input?.instagram),
     youtube: safeUrl(input?.youtube),
-    contactEmail: clip(input?.contactEmail, 160),
+    contactEmail: (() => {
+      const m = clip(input?.contactEmail, 160);
+      if (m && !EMAIL.test(m)) throw new Error("Mailadressen ser forkert ud.");
+      return m;
+    })(),
     contactPhone: clip(input?.contactPhone, 40),
   }))
   .handler(async ({ context, data }) => {
