@@ -33,9 +33,9 @@
       "url": "/medier/billard/sponsorer/pro-koe.svg"
      },
      {
-      "name": "Sanderum Pubben.png",
-      "path": "billard/sponsorer/Sanderum Pubben.png",
-      "url": "/medier/billard/sponsorer/Sanderum%20Pubben.png"
+      "name": "sanderum-pubben.png",
+      "path": "billard/sponsorer/sanderum-pubben.png",
+      "url": "/medier/billard/sponsorer/sanderum-pubben.png"
      },
      {
       "name": "stream-services.svg",
@@ -43,9 +43,9 @@
       "url": "/medier/billard/sponsorer/stream-services.svg"
      },
      {
-      "name": "Ullerslev Pub.png",
-      "path": "billard/sponsorer/Ullerslev Pub.png",
-      "url": "/medier/billard/sponsorer/Ullerslev%20Pub.png"
+      "name": "ullerslev-pub.png",
+      "path": "billard/sponsorer/ullerslev-pub.png",
+      "url": "/medier/billard/sponsorer/ullerslev-pub.png"
      }
     ],
     "baand": [
