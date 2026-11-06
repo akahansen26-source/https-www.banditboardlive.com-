@@ -1,0 +1,52 @@
+{
+ "_info": "BanditBoard Live – roller og rettigheder. Serveren læser denne fil ved start og håndhæver den på alle sider, API-kald og data-ændringer. 'inherits' betyder: rollen får alle rettigheder fra den nævnte rolle + sine egne.",
+ "version": 1,
+ "permissions": {
+  "VIEW_PUBLIC":                 { "group": "Offentlig",   "label": "Se offentligt indhold (turneringer, rangliste, historik, resultater, pubber)" },
+  "VIEW_OWN_BOARD":              { "group": "Personlig",   "label": "Bruge sin egen tavle og se egne resultater" },
+  "USE_SCOREBOARD":              { "group": "Scoreboard",  "label": "Åbne og køre scoreboardet (bord, runde, kamp, aktiv spiller)" },
+  "EDIT_SCORE":                  { "group": "Scoreboard",  "label": "Give, trække fra og rette point" },
+  "EDIT_PLAYER":                 { "group": "Scoreboard",  "label": "Oprette og rette spillere" },
+  "EDIT_TEAM":                   { "group": "Scoreboard",  "label": "Oprette og rette hold" },
+  "EDIT_MATCH":                  { "group": "Scoreboard",  "label": "Styre kampene i den aktuelle turnering (start, flyt, resultat)" },
+  "CONTROL_TIMER":               { "group": "Scoreboard",  "label": "Styre timeren (start, pause, nulstil, ±1 min)" },
+  "USE_REMOTE":                  { "group": "Scoreboard",  "label": "Bruge Remote Controller" },
+  "USE_OVERLAY":                 { "group": "Scoreboard",  "label": "Bruge OBS-overlay og TV-visning" },
+  "CREATE_TOURNAMENT":           { "group": "Turneringer", "label": "Oprette turneringer og åbne gemte turneringer" },
+  "EDIT_TOURNAMENT":             { "group": "Turneringer", "label": "Redigere turneringer (opsætning, kampprogram, runder, tilmeldinger)" },
+  "DELETE_TOURNAMENT":           { "group": "Turneringer", "label": "Slette/arkivere turneringer og kampresultater" },
+  "MANAGE_PLAYERS":              { "group": "Turneringer", "label": "Administrere spillere og hold (også slette)" },
+  "IMPORT_PLAYERS":              { "group": "Turneringer", "label": "Importere spillere fra CSV/XLSX" },
+  "EXPORT_RESULTS":              { "group": "Turneringer", "label": "Eksportere resultater (CSV, Excel, PDF)" },
+  "MANAGE_LAYOUT":               { "group": "Turneringer", "label": "Administrere scoreboard-layout, designs, sponsorboards og medier" },
+  "MANAGE_REMOTE":               { "group": "Turneringer", "label": "Administrere Remote Controller, TV/OBS-nøgle og enheder" },
+  "MANAGE_SCOREBOARD_SETTINGS":  { "group": "Turneringer", "label": "Administrere scoreboard-indstillinger (borde, pointknapper, dart-input, grænser)" },
+  "VIEW_AUDIT":                  { "group": "Turneringer", "label": "Se handlingsloggen" },
+  "MANAGE_USERS":                { "group": "System",      "label": "Administrere brugere (oprette, redigere, deaktivere)" },
+  "MANAGE_ROLES":                { "group": "System",      "label": "Tildele roller (kun roller man selv må tildele)" },
+  "MANAGE_PUBS":                 { "group": "System",      "label": "Administrere pubber og events" },
+  "MANAGE_SETTINGS":             { "group": "System",      "label": "Administrere systemets almindelige indstillinger" },
+  "MANAGE_SOCIAL":               { "group": "System",      "label": "Administrere sociale medier" },
+  "MANAGE_ADMINS":               { "group": "Manager",     "label": "Oprette, ændre og fjerne administratorer" },
+  "MANAGE_MANAGERS":             { "group": "Manager",     "label": "Oprette, ændre og fjerne administrator-managere" }
+ },
+ "roles": [
+  { "id": "guest",    "name": "Gæst",                  "rank": 0, "summary": ["Offentlig visning", "Ingen scoreboard-adgang"],
+    "permissions": ["VIEW_PUBLIC"] },
+  { "id": "user",     "name": "Bruger",                "rank": 1, "summary": ["Egen tavle", "Personlige funktioner", "Ingen administration"],
+    "inherits": "guest", "permissions": ["VIEW_OWN_BOARD"] },
+  { "id": "scorer",   "name": "Scoreboard-admin",      "rank": 2, "summary": ["Køre live scoreboard", "Point, spillere, timer, kampe og turnering"],
+    "inherits": "guest", "permissions": ["USE_SCOREBOARD", "EDIT_SCORE", "EDIT_PLAYER", "EDIT_TEAM", "EDIT_MATCH", "CONTROL_TIMER", "USE_REMOTE", "USE_OVERLAY"] },
+  { "id": "scoremgr", "name": "Administrer scoreboard", "rank": 3, "summary": ["Alt scoreboard-admin kan", "Oprette og administrere turneringer og scoreboard-data"],
+    "inherits": "scorer", "permissions": ["CREATE_TOURNAMENT", "EDIT_TOURNAMENT", "DELETE_TOURNAMENT", "MANAGE_PLAYERS", "IMPORT_PLAYERS", "EXPORT_RESULTS", "MANAGE_LAYOUT", "MANAGE_REMOTE", "MANAGE_SCOREBOARD_SETTINGS", "VIEW_AUDIT"] },
+  { "id": "admin",    "name": "Admin",                 "rank": 4, "summary": ["Brugere, pubber, systemindstillinger og administration", "Kan ikke administrere andre administratorer eller managere"],
+    "inherits": "scoremgr", "permissions": ["MANAGE_USERS", "MANAGE_ROLES", "MANAGE_PUBS", "MANAGE_SETTINGS", "MANAGE_SOCIAL"] },
+  { "id": "manager",  "name": "Administrator-manager", "rank": 5, "summary": ["Fuld adgang", "Kan administrere administratorer og andre managere"],
+    "permissions": ["*"] }
+ ],
+ "assign": {
+  "_info": "Hvilken rettighed kræves for at oprette, ændre eller fjerne en bruger med denne rolle (ud over MANAGE_USERS).",
+  "guest": "MANAGE_USERS", "user": "MANAGE_USERS", "scorer": "MANAGE_USERS", "scoremgr": "MANAGE_USERS",
+  "admin": "MANAGE_ADMINS", "manager": "MANAGE_MANAGERS"
+ }
+}
