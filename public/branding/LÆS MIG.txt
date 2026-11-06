@@ -1,0 +1,4 @@
+SYSTEMLOGO TIL BANDITBOARD LIVE
+Læg jeres logo her med navnet logo.png (eller logo.svg / logo.webp / logo.jpg).
+Brug gerne en PNG med gennemsigtig baggrund. Logoet vises præcis som filen er.
+Det kan også uploades under fanen "Medier" i BanditBoard Live.
