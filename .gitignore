@@ -1,9 +1,7 @@
-# Installeres automatisk (npm install) – skal ikke på GitHub
 node_modules/
-# Klubbens egne data: spillere, kampe, handlingslog, gemte turneringer – bliver på computeren
-data/
-# Cloudflare / diverse
-.wrangler/
-.DS_Store
-Thumbs.db
-*.log
+.project_id
+.github_repo
+.env
+.env.*
+
+.vercel/

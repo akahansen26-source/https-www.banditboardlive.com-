@@ -1,4 +1,0 @@
-# Bruges kun hvis du tester Pages-udgaven lokalt med:  npx wrangler pages dev
-name = "banditboard-live"
-compatibility_date = "2026-09-01"
-pages_build_output_dir = "public"
