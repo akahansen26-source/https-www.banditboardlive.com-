@@ -410,7 +410,7 @@ function AdminPage() {
           }}
         >
           <h2 className="font-display text-3xl">Bund og sociale medier</h2>
-          <p className="text-sm text-muted">Links skal starte med https://. Ikonerne vises altid nederst — de bliver klikbare, når der står et link.</p>
+          <p className="text-sm text-muted">Indsæt links til jeres sider – https:// tilføjes automatisk. Ikonerne vises altid nederst — de bliver klikbare, når der står et link.</p>
           <Field label="Facebook">
             <input className={inputClass} value={settings.facebook} onChange={(e) => setSettings({ ...settings, facebook: e.target.value })} placeholder="https://facebook.com/…" />
           </Field>

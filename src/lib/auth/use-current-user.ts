@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { authClient, authEnabled } from "./client";
 
 /** Normalized user shape used across the app, auth on or off. */
@@ -56,21 +57,16 @@ export type CurrentUserState = {
  */
 export function useCurrentUserState(): CurrentUserState {
   if (!authEnabled) return { user: DEV_USER, isPending: false };
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- authEnabled is constant for the app's lifetime
   const { data, isPending } = authClient.useSession();
-  const user = data?.user;
-  return {
-    user: user
-      ? {
-          id: user.id,
-          displayName: user.name ?? null,
-          primaryEmail: user.email ?? null,
-          profileImageUrl: user.image ?? null,
-          isDevFallback: false,
-        }
-      : null,
-    isPending,
-  };
+  const u = data?.user;
+  // Stabilt objekt: samme bruger = samme reference, så useEffect([user]) ikke kører ved hver render
+  // (det fik formularer til at blive nulstillet, mens man skrev i dem).
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- authEnabled is constant for the app's lifetime
+  const user = useMemo<AppUser | null>(
+    () => (u ? { id: u.id, displayName: u.name ?? null, primaryEmail: u.email ?? null, profileImageUrl: u.image ?? null, isDevFallback: false } : null),
+    [u?.id, u?.name, u?.email, u?.image], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  return { user, isPending };
 }
 
 /**
