@@ -1,0 +1,147 @@
+BANDITBOARD LIVE – SÅDAN STARTER DU
+===========================
+
+WINDOWS
+  Dobbeltklik på "Start BanditBoard Live (Windows).bat".
+  Scoreboardet åbner selv i browseren.
+  Første gang: hvis Node.js mangler, installerer vinduet det automatisk.
+  Start derefter filen igen.
+  Hvis Windows viser "Windows beskyttede din pc": klik "Flere oplysninger" og "Kør alligevel".
+  Hvis firewallen spørger: tillad Node.js på PRIVAT netværk (ellers kan tablets og TV ikke forbinde).
+
+MAC
+  Højreklik på "Start BanditBoard Live (Mac).command" og vælg "Åbn" (kun første gang).
+
+FØRSTE GANG: OPRET ADMINISTRATOR-MANAGER
+  Når scoreboardet åbner på klub-computeren første gang, beder det dig oprette den
+  første Administrator-manager (navn, brugernavn, kodeord på mindst 8 tegn).
+  Det kan KUN gøres på selve computeren, som BanditBoard Live kører på.
+  Bagefter: Brugere -> "Opret bruger" for alle, der skal have adgang.
+
+STOP
+  Luk det sorte vindue. Data er gemt i mappen "data".
+
+BRUGERE, ROLLER OG RETTIGHEDER
+  Alle skal logge ind for at styre noget. Uden login er man GÆST og kan kun se
+  turneringer, rangliste, historik, resultater og pubber - aldrig scoreboardet.
+    Gæst                   Kun offentlig visning - ingen scoreboard
+    Bruger                 Egen tavle ("Min tavle"), egen profil og egne resultater
+    Scoreboard-admin       Køre live scoreboard: point, spillere, timer, kampe, remote, OBS
+    Administrer scoreboard + oprette/redigere/slette turneringer, import, eksport, layout
+    Admin                  + brugere, pubber, sociale medier og systemindstillinger
+    Administrator-manager  Alt - også administratorer og andre managere
+  Serveren tjekker rettighederne ved HVER side, HVERT API-kald og HVER ændring.
+  Gemte knapper er ikke sikkerheden - serveren svarer 403 ACCESS DENIED.
+  En Admin kan ikke oprette, ændre eller slette administratorer eller managere,
+  og ingen kan ændre sin egen rolle. Der er altid mindst én aktiv manager.
+  Fanen "Roller" viser alle rettigheder.  Fanen "Log" viser hvem der gjorde hvad.
+  Glemt kodeord? Bed en manager om et nyt (Brugere -> Rediger).
+  Ingen manager kan logge ind?  Luk BanditBoard Live og kør i mappen:
+      npm run nulstil-adgang -- <brugernavn> <nyt-kodeord>
+
+VIRKER LINKS IKKE PÅ ANDRE ENHEDER? ("siden findes ikke" / "kan ikke få forbindelse")
+  1. Brug adressen fra det SORTE vindue (fx http://192.168.1.20:3000/),
+     IKKE "localhost" og IKKE claude.ai-linket - det virker kun på din egen konto.
+  2. Enheden skal være på SAMME WiFi som computeren (ikke gæste-WiFi).
+  3. Test fra telefonen: adressen + test  (fx http://192.168.1.20:3000/test)
+  4. Virker testen ikke: dobbeltklik "Reparér netværk (Windows).bat" og klik "Ja".
+  5. Stadig nej? Nogle routere har "klient-isolering" (AP isolation) slået til
+     - den skal slås fra i routeren.
+
+ANDRE ENHEDER PÅ SAMME WIFI
+  Vinduet viser adressen, fx http://192.168.1.20:3000/
+  TV og OBS: brug linkene under fanen "OBS & TV". De indeholder klubbens
+             visningsnøgle (?key=VS-...), så TV/OBS kan VISE uden login - men aldrig styre.
+             Lav en ny nøgle (Indstillinger -> Remote og enheder), hvis et link er kommet ud.
+  Spillere:  adressen + /mig  (log ind -> egen spillerprofil og tilmelding)
+
+MEDIER (LOGOER, SPONSORER, BÅND)
+  Mappen "medier" har en undermappe pr. sportsgren (billard, dart, fodbold, faelles)
+  med logoer, sponsorer, baand og baggrunde. Læg billeder ind - BanditBoard Live ser dem selv.
+  Vælg hvad der vises under fanen "Medier" i BanditBoard Live.
+
+SYSTEMLOGO (BANDITBOARD LIVE)
+  Læg jeres logo i mappen "branding" med navnet logo.png (eller .svg/.webp),
+  eller upload det under fanen "Medier". Det vises i toppen, på TV, login og mobil.
+
+SCOREBOARD-DESIGN OG SPONSORBOARD
+  Indstillinger -> "Scoreboard-design & sponsorboard": vælg pr. sportsgren
+  (Billard / Dart / Fodbold) hvilket design og hvilket sponsorboard OBS viser.
+  Designs: Kobber Classic, Grøn filt, Arena (blå stadion), Bandit Neon,
+  Dart rød/sort, Minimal mørk + egne.  Sponsorboards: bånd, kun logoer,
+  rullende eller sponsorgalleri (filt).
+  Flere designs: læg .json-filer i public/medier/<sport>/designs eller
+  public/medier/<sport>/sponsorboards - eller importér dem i appen.
+  Sponsorboard alene i OBS: adressen + /sponsor
+
+TURNERINGSOVERSIGT (hold x borde)
+  Fanen "Oversigt": alle hold ned ad venstre side, Bord 1-10 hen over toppen,
+  Skæve / Score / Point / Placering til højre.
+  1. Opret/importér hold  2. Vælg runde  3. "Lav kampprogram" (eller + Ny kamp /
+     tryk i et tomt felt)  4. Tryk "Start" ud for kampen - den starter på sit bord.
+  Flyt en kamp: vælg et andet bord i listen (også mens den spilles).
+  Timer: Start / Pause / Nulstil / Sæt tid - vises også i OBS og på remote.
+  OBS / storskærm (1920 x 1080): adressen + /turnering   (eller #turnering)
+
+SKÆVE, RET TAL OG NULSTIL
+  Minuspoint/skæve: vælg spilleren og tryk -2 -4 -6 -8 ... eller skriv -6 + Enter.
+         Spilleren får minus i skæve-kolonnen, alle andre får pointene.
+  ✎ Ret tal: skriv +5 / 5+ (læg til), -3 / 3- (træk fra) eller 40 (sæt til 40).
+  ↺ Nulstil tavle: alle point, skæve og runder tilbage til start.
+  ⚙ Tilpas: slå pointknapper, skæve, historik m.m. til/fra i hvert modul.
+
+CENTRAL TIMER, DATO, TID OG STED
+  Indstillinger -> "Timer, dato, tid og sted" (ogsaa paa remote og Oversigt).
+  Skriv tiden: 10 / 10:00 / 1:30:00 / 90 min / 1 time og 30 minutter + Enter.
+  Start, Pause, Fortsaet, Nulstil (tilbage til den indstillede tid), +1 / -1 min.
+  Stopper ved 00:00 (roed markering) - ingen minustal.
+  Vaelg hvad der vises paa OBS og TV: timer, dato, klokkeslaet (live eller starttid),
+  sted og turneringsnavn.  Timeren som data: adressen + /api/timer
+
+FLERE BORDE
+  Øverst på Spil-fanen: vælg bord eller "+ Bord". Hvert bord har sin egen kamp.
+  OBS pr. bord:  adressen + #overlay/1, #overlay/2 ... (browserkilde 1920 x 1080)
+  TV pr. bord:   adressen + #tv/1, #tv/2 ...
+  Alle borde:    adressen + #tv/alle  (oversigt til storskærm)
+  Remote: vælg bord i toppen af remote-siden.
+  Omdøb/fjern borde under Indstillinger -> Borde.
+
+REMOTE CONTROL (telefon/tablet styrer tavlen)
+  På telefon/tablet (samme WiFi): åbn adressen + remote (fx http://192.168.1.20:3000/remote)
+  og log ind. Kun brugere med mindst rollen Scoreboard-admin kan styre.
+  De gamle AD-/OP-koder findes ikke længere - adgang følger brugerens rolle.
+  Tilsluttede enheder og hvem der er logget ind: Indstillinger -> Remote og enheder.
+
+IMPORT AF SPILLERE
+  Kartotek -> "Importér spillere". CSV, Excel (.xlsx), JSON eller TXT.
+  Første række: Nr, Fornavn, Efternavn, Hold (valgfrit Klub, Sponsor, ID, PIN).
+  Hent en færdig skabelon i import-vinduet.
+
+TURNERINGSPROFIL
+  Turneringer -> "Gem turnering" gemmer alt (spillere, hold, point, aktiv spiller ...)
+  i mappen data/turneringer - eller som fil. "Åbn" fortsætter hvor I slap.
+
+BACKUP
+  Kopiér mapperne "data", "medier" og "branding". Handlingsloggen (audit.jsonl) slettes aldrig automatisk.
+
+Flere detaljer: README.md
+
+OPDATERING
+  Kopiér kun de nye filer ind. Slet ALDRIG mapperne "data", "medier" og "branding" - de indeholder
+  jeres spillere, kampe og logoer.
+  Fra version 1.2: den gamle admin-PIN og remote-koderne er erstattet af brugerkonti.
+  Efter opdateringen opretter du den første Administrator-manager på klub-computeren.
+
+ONLINE PÅ CLOUDFLARE PAGES (VALGFRIT)
+  Mappen public/ er selve hjemmesiden. Læg projektet på GitHub og forbind det til
+  Cloudflare Pages (Build command: npm run build · Output: public).
+  Trin for trin: se README.md.  Mappen data/ (jeres spillere og kampe) kommer
+  aldrig på GitHub. Online-udgaven kører i én browser ad gangen – remote, TV og
+  OBS på andre enheder kræver den lokale server (som nu).
+  Online-udgaven har ingen server og derfor heller ingen login: den er en lokal demo,
+  hvor alt kun gemmes i den besøgendes egen browser og ALDRIG deles med klubbens data.
+  Billeder og designs ligger nu i public/medier og public/branding.
+
+ONLINE PÅ VERCEL (VALGFRIT)
+  vercel.com -> Add New -> Project -> vælg repository'et -> Deploy.
+  Indstillingerne læses selv fra vercel.json. Se README.md, afsnit 3b.
