@@ -1,6 +1,6 @@
 # Cloudflare Pages: pæne adresser -> appens visninger (samme som den lokale server)
 /remote               /#remote          302
-/remote/:code         /#remote          302
+/remote/:code         /#remote/:code    302
 /turnering            /#turnering       302
 /overlay/tournament   /#turnering       302
 /display/tournament   /#turnering       302
@@ -9,9 +9,3 @@
 /tv                   /#tv              302
 /obs                  /#overlay/1       302
 /sponsor              /#sponsor         302
-/scoreboard           /#scoreboard      302
-/login                /#login           302
-/brugere              /#brugere         302
-/roller               /#roller          302
-/min-tavle            /#min-tavle       302
-/mig                  /#mig             302

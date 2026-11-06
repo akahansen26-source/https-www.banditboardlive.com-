@@ -1,14 +1,13 @@
 {
   "name": "banditboard-live",
-  "version": "1.2.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "BanditBoard Live – scoreboard og turneringssystem med brugere, roller og rettigheder. Kører lokalt (Node + Socket.IO) og statisk på Cloudflare Pages/Vercel.",
+  "description": "BanditBoard Live – scoreboard og turneringssystem. Kører lokalt (Node + Socket.IO) og statisk på Cloudflare Pages.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "build": "node scripts/build-pages.js",
-    "pages:dev": "npm run build && npx wrangler pages dev public",
-    "nulstil-adgang": "node scripts/nulstil-adgang.js"
+    "pages:dev": "npm run build && npx wrangler pages dev public"
   },
   "dependencies": {
     "express": "^4.19.2",
