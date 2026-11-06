@@ -54,8 +54,11 @@ export async function ensureCmsSchema(sql: CmsSql) {
   for (const statement of CMS_SCHEMA) await sql.query(statement);
 }
 
+/** Den delte udviklerbruger, som appen falder tilbage til uden login. Må aldrig redigere. */
+export const FALLBACK_USER_IDS = new Set(["dev-user", ""]);
+
 export function requireEditor(actor: Actor | null | undefined): Actor {
-  if (!actor) throw new CmsError("Du skal være logget ind.");
+  if (!actor || FALLBACK_USER_IDS.has(String(actor.id ?? "").trim())) throw new CmsError("Du skal være logget ind med en rigtig konto.");
   if (actor.accountStatus !== "approved") throw new CmsError("Din konto er ikke godkendt.");
   if (!hasPermission(normalizeRole(actor.role), "MANAGE_CONTENT")) throw new CmsError("Du har ikke adgang til at redigere hjemmesiden.");
   return actor;

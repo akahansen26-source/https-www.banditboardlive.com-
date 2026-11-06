@@ -6,7 +6,7 @@
  * ingen rå HTML. Links tillades kun som interne stier, https/http eller mailto.
  */
 
-export const BLOCK_TYPES = ["hero", "text", "image", "features", "cta", "faq"] as const;
+export const BLOCK_TYPES = ["hero", "text", "image", "features", "steps", "sports", "rules", "cta", "faq"] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export const BLOCK_LABEL: Record<BlockType, string> = {
@@ -14,17 +14,23 @@ export const BLOCK_LABEL: Record<BlockType, string> = {
   text: "Tekstafsnit",
   image: "Billede",
   features: "Punkter / kort",
+  steps: "Trin (1-2-3)",
+  sports: "Sportsgrene (automatisk liste)",
+  rules: "Regler / mærkater",
   cta: "Opfordring med knap",
   faq: "Spørgsmål og svar",
 };
 
-export type HeroBlock = { id: string; type: "hero"; eyebrow: string; heading: string; text: string; imageId: string; ctaLabel: string; ctaHref: string };
+export type HeroBlock = { id: string; type: "hero"; eyebrow: string; heading: string; text: string; imageId: string; ctaLabel: string; ctaHref: string; accountButtons: boolean };
 export type TextBlock = { id: string; type: "text"; heading: string; body: string };
 export type ImageBlock = { id: string; type: "image"; imageId: string; alt: string; caption: string };
-export type FeaturesBlock = { id: string; type: "features"; heading: string; items: { title: string; text: string }[] };
+export type FeaturesBlock = { id: string; type: "features"; eyebrow: string; heading: string; text: string; items: { title: string; text: string }[] };
+export type StepsBlock = { id: string; type: "steps"; eyebrow: string; heading: string; text: string; items: { title: string; text: string }[] };
+export type SportsBlock = { id: string; type: "sports"; eyebrow: string; heading: string; text: string };
+export type RulesBlock = { id: string; type: "rules"; eyebrow: string; heading: string; text: string; items: { tag: string; text: string }[] };
 export type CtaBlock = { id: string; type: "cta"; heading: string; text: string; label: string; href: string };
-export type FaqBlock = { id: string; type: "faq"; heading: string; items: { q: string; a: string }[] };
-export type Block = HeroBlock | TextBlock | ImageBlock | FeaturesBlock | CtaBlock | FaqBlock;
+export type FaqBlock = { id: string; type: "faq"; eyebrow: string; heading: string; items: { q: string; a: string }[] };
+export type Block = HeroBlock | TextBlock | ImageBlock | FeaturesBlock | StepsBlock | SportsBlock | RulesBlock | CtaBlock | FaqBlock;
 
 export type PageStatus = "draft" | "published";
 
@@ -117,17 +123,22 @@ export function sanitizeBlock(raw: unknown, index: number): Block | null {
   const id = blockId(b.id, index);
   switch (b.type) {
     case "hero":
-      return { id, type: "hero", eyebrow: clip(b.eyebrow, 60), heading: clip(b.heading, 140), text: clip(b.text, 600), imageId: mediaId(b.imageId), ctaLabel: clip(b.ctaLabel, 40), ctaHref: safeHref(b.ctaHref) };
+      return { id, type: "hero", eyebrow: clip(b.eyebrow, 60), heading: clip(b.heading, 140), text: clip(b.text, 600), imageId: mediaId(b.imageId), ctaLabel: clip(b.ctaLabel, 40), ctaHref: safeHref(b.ctaHref), accountButtons: b.accountButtons === true };
     case "text":
       return { id, type: "text", heading: clip(b.heading, 140), body: clip(b.body, 8000) };
     case "image":
       return { id, type: "image", imageId: mediaId(b.imageId), alt: clip(b.alt, 200), caption: clip(b.caption, 300) };
     case "features":
-      return { id, type: "features", heading: clip(b.heading, 140), items: list(b.items, 12, (x) => ({ title: clip(x.title, 80), text: clip(x.text, 400) }), (x) => Boolean(x.title || x.text)) };
+    case "steps":
+      return { id, type: b.type, eyebrow: clip(b.eyebrow, 60), heading: clip(b.heading, 140), text: clip(b.text, 600), items: list(b.items, 12, (x) => ({ title: clip(x.title, 80), text: clip(x.text, 400) }), (x) => Boolean(x.title || x.text)) };
+    case "sports":
+      return { id, type: "sports", eyebrow: clip(b.eyebrow, 60), heading: clip(b.heading, 140), text: clip(b.text, 600) };
+    case "rules":
+      return { id, type: "rules", eyebrow: clip(b.eyebrow, 60), heading: clip(b.heading, 140), text: clip(b.text, 1500), items: list(b.items, 12, (x) => ({ tag: clip(x.tag, 30), text: clip(x.text, 400) }), (x) => Boolean(x.tag || x.text)) };
     case "cta":
       return { id, type: "cta", heading: clip(b.heading, 140), text: clip(b.text, 400), label: clip(b.label, 40), href: safeHref(b.href) };
     case "faq":
-      return { id, type: "faq", heading: clip(b.heading, 140), items: list(b.items, 30, (x) => ({ q: clip(x.q, 200), a: clip(x.a, 1500) }), (x) => Boolean(x.q && x.a)) };
+      return { id, type: "faq", eyebrow: clip(b.eyebrow, 60), heading: clip(b.heading, 140), items: list(b.items, 30, (x) => ({ q: clip(x.q, 200), a: clip(x.a, 1500) }), (x) => Boolean(x.q && x.a)) };
     default:
       return null;
   }
@@ -173,4 +184,45 @@ export function sniffImage(bytes: Uint8Array): (typeof MEDIA_TYPES)[number] | nu
   if (bytes.length >= 6 && at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x38) return "image/gif";
   if (bytes.length >= 12 && String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" && String.fromCharCode(...bytes.slice(8, 12)) === "WEBP") return "image/webp";
   return null;
+}
+
+/** Startindholdet til forsiden. Bruges, indtil en redaktør udgiver sin egen forside. */
+export function defaultHomeBlocks(): Block[] {
+  return [
+    { id: "home-hero", type: "hero", eyebrow: "Live scoreboard", heading: "Scoreboardet til klubben, pubben og storskærmen", text: "BanditBoard Live holder styr på point, regler og turneringer i over 35 sportsgrene — fra billard og dart til boldspil og kampsport. Kør kampen fra telefonen, og vis den på TV, i OBS og live på nettet.", imageId: "", ctaLabel: "", ctaHref: "", accountButtons: true },
+    { id: "home-steps", type: "steps", eyebrow: "Sådan virker det", heading: "Fra opstilling til storskærm på få minutter", text: "", items: [
+      { title: "Opret en bruger", text: "Nye konti kan se live, resultater og turneringer. En administrator giver adgang til scoreboardet." },
+      { title: "Vælg sport og regler", text: "Vælg sportsgren og variant, tilpas reglerne, og start en kamp eller turnering." },
+      { title: "Vis det på skærmen", text: "Kør tavlen fra telefonen, vis den på TV eller i OBS, og lad publikum følge med live." },
+    ] },
+    { id: "home-features", type: "features", eyebrow: "Funktioner", heading: "Det kan scoreboardet", text: "", items: [
+      { title: "Over 35 sportsgrene", text: "Fra pool, snooker og dart til fodbold, tennis, kampsport og løb. Hver sport har sit eget regelsæt og sin egen pointberegning." },
+      { title: "Flere borde og baner", text: "Hvert bord har sin egen kamp. Oversigten viser hold, runder, point og placering." },
+      { title: "TV og OBS-overlay", text: "Storskærmsvisning og overlay til OBS/Streamlabs: scorebar, hjørneboks eller fuld tavle i 1920×1080." },
+      { title: "Ur og fase", text: "Ur der tæller op eller ned, dato, klokkeslæt og sted — vist på TV og i overlayet." },
+      { title: "Spillere og hold", text: "Kartotek med spillere, hold og kaptajn, import fra Excel eller CSV, rangliste og historik." },
+      { title: "Turneringer og rangliste", text: "Liga, grupper og knockout med automatisk stilling og valgbar placering ved pointlighed." },
+      { title: "Godkendte resultater", text: "Resultater kan markeres som foreløbige, til en turneringsleder har godkendt dem." },
+      { title: "Samme konto overalt", text: "Log ind på telefonen og på TV'et. Tavlen gemmes på kontoen og følger med." },
+      { title: "Alt gemmes", text: "Kamphistorik, pointhistorik og turneringer, så I kan fortsætte, hvor I slap." },
+    ] },
+    { id: "home-sports", type: "sports", eyebrow: "Sportsgrene", heading: "Sportsgrene med egne regler", text: "" },
+    { id: "home-rules", type: "rules", eyebrow: "Regler i korte træk", heading: "Reglerne følger sporten — og jer", text: "Hver sportsgren har et standardregelsæt, som tavlen regner efter: point, sæt, legs, frames, tid eller placeringer. Før kampen kan reglerne tilpasses, og der kan vælges varianter — fx 11-, 7- eller 5-mands fodbold eller knockout med forlænget spilletid og straffe.", items: [
+      { tag: "Officiel", text: "Værdien følger den nævnte officielle regelkilde. Forbund opdaterer reglerne — kontrollér altid nyeste udgave." },
+      { tag: "Standard", text: "Almindelig praksis i ligaer og klubber, fx 3-1-0 point for sejr, uafgjort og nederlag. Ikke en officiel spilleregel." },
+      { tag: "Jeres egne", text: "Skomager og egne sportsgrene har ingen fælles regler. I bestemmer selv hændelser, bonus- og minuspoint." },
+      { tag: "Placering", text: "Ved pointlighed vælger turneringen rækkefølgen, fx point → indbyrdes opgør → målscore." },
+    ] },
+    { id: "home-lending", type: "steps", eyebrow: "Udlån", heading: "Lån tavlen ud til pub eller klub", text: "", items: [
+      { title: "Gæst", text: "Nye konti starter som gæst og kan se turnering, rangliste og historik." },
+      { title: "Rolle", text: "I admin søger du dem frem og giver dem en rolle, fx bruger eller scoreboard-admin." },
+      { title: "Egen tavle", text: "De logger ind med deres egen konto og bruger kun deres egen tavle." },
+    ] },
+    { id: "home-faq", type: "faq", eyebrow: "Spørgsmål", heading: "Godt at vide", items: [
+      { q: "Er reglerne officielle?", a: "Hver regel er mærket som officiel, almindelig standard eller BanditBoard-funktion. Standardværdierne følger den nævnte regelkilde, men forbund og turneringer kan have egne udgaver — kontrollér altid den gældende udgave, og tilpas reglerne før kampen." },
+      { q: "Kan vi bruge vores egne pubregler?", a: "Ja. Skomager og \"Egen sportsgren\" har ingen fælles officielle regler — I opretter selv hændelser, bonus- og minuspoint. Eksemplerne som \"kegle\" og \"skæv\" er kun forslag, der kan rettes." },
+      { q: "Skal vi installere noget?", a: "Nej. BanditBoard Live kører i browseren på telefon, tablet, computer og TV. På telefonen kan siden lægges på hjemmeskærmen som en app." },
+      { q: "Kan pubben låne tavlen?", a: "Ja. En administrator opretter pubben eller klubben med e-mail og kontaktperson og giver en rolle. De logger ind og bruger kun deres egen tavle." },
+    ] },
+  ];
 }

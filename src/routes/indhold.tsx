@@ -13,6 +13,7 @@ import {
   HOME_SLUG,
   MAX_MEDIA_BYTES,
   MEDIA_TYPES,
+  defaultHomeBlocks,
   slugify,
   type Block,
   type BlockType,
@@ -38,12 +39,15 @@ const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(
 function emptyBlock(type: BlockType): Block {
   const id = uid();
   switch (type) {
-    case "hero": return { id, type, eyebrow: "", heading: "Overskrift", text: "", imageId: "", ctaLabel: "", ctaHref: "" };
+    case "hero": return { id, type, eyebrow: "", heading: "Overskrift", text: "", imageId: "", ctaLabel: "", ctaHref: "", accountButtons: false };
     case "text": return { id, type, heading: "", body: "" };
     case "image": return { id, type, imageId: "", alt: "", caption: "" };
-    case "features": return { id, type, heading: "", items: [{ title: "", text: "" }] };
+    case "features": return { id, type, eyebrow: "", heading: "", text: "", items: [{ title: "", text: "" }] };
+    case "steps": return { id, type, eyebrow: "", heading: "", text: "", items: [{ title: "", text: "" }] };
+    case "sports": return { id, type, eyebrow: "Sportsgrene", heading: "Sportsgrene med egne regler", text: "" };
+    case "rules": return { id, type, eyebrow: "", heading: "", text: "", items: [{ tag: "", text: "" }] };
     case "cta": return { id, type, heading: "", text: "", label: "", href: "/" };
-    case "faq": return { id, type, heading: "Spørgsmål og svar", items: [{ q: "", a: "" }] };
+    case "faq": return { id, type, eyebrow: "", heading: "Spørgsmål og svar", items: [{ q: "", a: "" }] };
   }
 }
 
@@ -147,6 +151,11 @@ function Editor() {
         <div className="mt-4 grid gap-6 lg:grid-cols-[18rem_1fr]">
           <aside className="grid content-start gap-5">
             <button type="button" className={btnPrimary} onClick={() => { setDraft(newPage()); setNote(""); setError(""); }}><Plus className="size-4" />Ny side</button>
+            <button type="button" className={btnGhost} onClick={() => {
+              const home = pages.find((p) => p.slug === HOME_SLUG);
+              setDraft(home ?? { ...newPage(), slug: HOME_SLUG, title: "Forside", blocks: defaultHomeBlocks() });
+              setNote(home ? "" : "Forsiden er indlæst med standardindholdet. Ret det, og tryk Udgiv."); setError("");
+            }}>Rediger forsiden</button>
             <div className="rounded-card border border-line bg-surface p-3">
               <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-muted">Alle sider</p>
               {pages.length === 0 ? <p className="px-2 text-sm text-muted">Ingen sider endnu.</p> : null}
@@ -288,6 +297,7 @@ function BlockFields({ block, media, onChange }: { block: Block; media: MediaInf
             <L label="Knaptekst"><input className={input} value={block.ctaLabel} maxLength={40} onChange={(e) => onChange({ ...block, ctaLabel: e.target.value })} /></L>
             <L label="Knaplink" hint="Fx /opret eller https://…"><input className={input} value={block.ctaHref} maxLength={500} onChange={(e) => onChange({ ...block, ctaHref: e.target.value })} /></L>
           </div>
+          <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" checked={block.accountButtons} onChange={(e) => onChange({ ...block, accountButtons: e.target.checked })} />Vis login-knapper (Opret bruger / Åbn scoreboard) og scoreboard-eksemplet, når der ikke er valgt billede</label>
         </div>
       );
     case "text":
@@ -306,9 +316,10 @@ function BlockFields({ block, media, onChange }: { block: Block; media: MediaInf
         </div>
       );
     case "features":
+    case "steps":
       return (
         <div className="grid gap-3">
-          <L label="Overskrift"><input className={input} value={block.heading} maxLength={140} onChange={(e) => onChange({ ...block, heading: e.target.value })} /></L>
+          <HeadFields block={block} onChange={onChange} />
           {block.items.map((item, i) => (
             <div key={i} className="grid gap-2 rounded-xl bg-surface-2 p-3 sm:grid-cols-[1fr_2fr_auto]">
               <input className={input} placeholder="Titel" value={item.title} maxLength={80} onChange={(e) => onChange({ ...block, items: block.items.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />
@@ -317,6 +328,27 @@ function BlockFields({ block, media, onChange }: { block: Block; media: MediaInf
             </div>
           ))}
           {block.items.length < 12 ? <button type="button" className={`${btnGhost} justify-self-start`} onClick={() => onChange({ ...block, items: [...block.items, { title: "", text: "" }] })}><Plus className="size-4" />Tilføj punkt</button> : null}
+        </div>
+      );
+    case "sports":
+      return (
+        <div className="grid gap-3">
+          <HeadFields block={block} onChange={onChange} />
+          <p className="text-sm text-muted">Listen over sportsgrene hentes automatisk fra appens sportskatalog.</p>
+        </div>
+      );
+    case "rules":
+      return (
+        <div className="grid gap-3">
+          <HeadFields block={block} onChange={onChange} long />
+          {block.items.map((item, i) => (
+            <div key={i} className="grid gap-2 rounded-xl bg-surface-2 p-3 sm:grid-cols-[1fr_2fr_auto]">
+              <input className={input} placeholder="Mærkat, fx Officiel" value={item.tag} maxLength={30} onChange={(e) => onChange({ ...block, items: block.items.map((x, j) => (j === i ? { ...x, tag: e.target.value } : x)) })} />
+              <input className={input} placeholder="Forklaring" value={item.text} maxLength={400} onChange={(e) => onChange({ ...block, items: block.items.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} />
+              <button type="button" className={iconBtn} onClick={() => onChange({ ...block, items: block.items.filter((_, j) => j !== i) })} aria-label="Fjern punkt"><Trash2 className="size-4" /></button>
+            </div>
+          ))}
+          {block.items.length < 12 ? <button type="button" className={`${btnGhost} justify-self-start`} onClick={() => onChange({ ...block, items: [...block.items, { tag: "", text: "" }] })}><Plus className="size-4" />Tilføj punkt</button> : null}
         </div>
       );
     case "cta":
@@ -331,7 +363,10 @@ function BlockFields({ block, media, onChange }: { block: Block; media: MediaInf
     case "faq":
       return (
         <div className="grid gap-3">
-          <L label="Overskrift"><input className={input} value={block.heading} maxLength={140} onChange={(e) => onChange({ ...block, heading: e.target.value })} /></L>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <L label="Lille overskrift"><input className={input} value={block.eyebrow} maxLength={60} onChange={(e) => onChange({ ...block, eyebrow: e.target.value })} /></L>
+            <L label="Overskrift"><input className={input} value={block.heading} maxLength={140} onChange={(e) => onChange({ ...block, heading: e.target.value })} /></L>
+          </div>
           {block.items.map((item, i) => (
             <div key={i} className="grid gap-2 rounded-xl bg-surface-2 p-3">
               <div className="flex gap-2">
@@ -345,6 +380,18 @@ function BlockFields({ block, media, onChange }: { block: Block; media: MediaInf
         </div>
       );
   }
+}
+
+type HeadBlock = Extract<Block, { eyebrow: string; heading: string; text: string }>;
+
+function HeadFields<T extends HeadBlock>({ block, onChange, long }: { block: T; onChange: (b: T) => void; long?: boolean }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <L label="Lille overskrift"><input className={input} value={block.eyebrow} maxLength={60} onChange={(e) => onChange({ ...block, eyebrow: e.target.value })} /></L>
+      <L label="Overskrift"><input className={input} value={block.heading} maxLength={140} onChange={(e) => onChange({ ...block, heading: e.target.value })} /></L>
+      <div className="sm:col-span-2"><L label="Indledning (valgfri)"><textarea className={area} value={block.text} maxLength={long ? 1500 : 600} onChange={(e) => onChange({ ...block, text: e.target.value })} /></L></div>
+    </div>
+  );
 }
 
 function MediaLibrary({ media, busy, run, reload }: {

@@ -19,6 +19,12 @@ export async function cmsDb(): Promise<CmsSql> {
 
 /** Rolle og kontostatus slås op i databasen, aldrig noget klienten selv påstår. */
 export async function editorFor(userId: string): Promise<Actor & { name: string }> {
+  // Fejl lukket: uden konfigureret login (eller med den delte dev-bruger) kan ingen redigere.
+  const { DEV_USER_ID, authConfigured } = await import("@/lib/auth/verify.server");
+  const { gateIdentityEnabled } = await import("@/lib/auth/gate-identity.server");
+  if (!userId || userId === DEV_USER_ID || !(authConfigured || gateIdentityEnabled())) {
+    throw new Error("Redigering af hjemmesiden kræver login med en rigtig administratorkonto.");
+  }
   const profile = await ensureProfile(userId);
   const actor = { id: profile.userId, role: profile.role, accountStatus: profile.accountStatus, name: profile.accountName || profile.email };
   requireEditor(actor);

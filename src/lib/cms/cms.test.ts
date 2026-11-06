@@ -5,7 +5,7 @@ import {
   deleteMedia, deletePage, ensureCmsSchema, listMedia, listNav, listPages, readMedia,
   readPublishedPage, reorderNav, requireEditor, savePage, uploadMedia, type Actor, type CmsSql,
 } from "./core.ts";
-import { CmsError, safeHref, sanitizeBlocks, sanitizePageInput, slugify, sniffImage } from "./schema.ts";
+import { CmsError, defaultHomeBlocks, safeHref, sanitizeBlocks, sanitizePageInput, slugify, sniffImage } from "./schema.ts";
 import { hasPermission } from "../roles.ts";
 
 const admin: Actor = { id: "u-admin", role: "admin", accountStatus: "approved" };
@@ -38,6 +38,45 @@ describe("CMS-adgang", () => {
     await assert.rejects(listPages(sql, scorer), CmsError);
     await assert.rejects(uploadMedia(sql, user, { dataUrl: pngUrl }), CmsError);
     await assert.rejects(deletePage(sql, pendingAdmin, "abcdefgh"), CmsError);
+  });
+});
+
+describe("Fejl lukket uden rigtig konto", () => {
+  const devAdmin: Actor = { id: "dev-user", role: "administrator_manager", accountStatus: "approved" };
+  const blank: Actor = { id: "  ", role: "admin", accountStatus: "approved" };
+
+  it("den delte dev-bruger kan aldrig redigere, heller ikke med manager-rolle", async () => {
+    for (const actor of [devAdmin, blank]) {
+      assert.throws(() => requireEditor(actor), /rigtig konto/);
+      await assert.rejects(savePage(sql, actor, { title: "X" }), CmsError);
+      await assert.rejects(listPages(sql, actor), CmsError);
+      await assert.rejects(uploadMedia(sql, actor, { dataUrl: pngUrl }), CmsError);
+      await assert.rejects(deleteMedia(sql, actor, "abcdefgh"), CmsError);
+      await assert.rejects(deletePage(sql, actor, "abcdefgh"), CmsError);
+      await assert.rejects(reorderNav(sql, actor, []), CmsError);
+    }
+  });
+
+  it("server-laget afviser dev-brugeren før profilopslag", async () => {
+    const src = await import("node:fs").then((fs) => fs.readFileSync(new URL("./server.ts", import.meta.url), "utf8"));
+    assert.match(src, /userId === DEV_USER_ID/);
+    assert.match(src, /authConfigured \|\| gateIdentityEnabled\(\)/);
+  });
+});
+
+describe("Forside", () => {
+  it("standardforsiden er gyldigt CMS-indhold og kan gemmes, redigeres og omordnes", async () => {
+    const defaults = defaultHomeBlocks();
+    assert.deepEqual(sanitizeBlocks(defaults), defaults, "standardindholdet overlever valideringen uændret");
+    assert.deepEqual(defaults.map((b) => b.type), ["hero", "steps", "features", "sports", "rules", "steps", "faq"]);
+    const blocks = [...defaults].reverse().map((b) => (b.type === "hero" ? { ...b, heading: "Ny overskrift" } : b));
+    const home = await savePage(sql, admin, { title: "Forside", slug: "forside", status: "published", blocks });
+    const read = await readPublishedPage(sql, "forside");
+    assert.equal(read?.blocks[0].type, "faq");
+    const hero = read?.blocks.find((b) => b.type === "hero");
+    assert.equal(hero?.type === "hero" && hero.heading, "Ny overskrift");
+    assert.equal(hero?.type === "hero" && hero.accountButtons, true);
+    await deletePage(sql, admin, home.id);
   });
 });
 
