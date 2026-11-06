@@ -17,9 +17,16 @@ import { Route as KontoRouteImport } from './routes/konto'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OpretRouteImport } from './routes/opret'
+import { Route as ResultaterRouteImport } from './routes/resultater'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SupportCenterRouteImport } from './routes/support-center'
 import { Route as TurneringRouteImport } from './routes/turnering'
+import { Route as KampIdRouteImport } from './routes/kamp.$id'
+import { Route as KampNyRouteImport } from './routes/kamp.ny'
+import { Route as SportIndexRouteImport } from './routes/sport.index'
+import { Route as SportSportIdRouteImport } from './routes/sport.$sportId'
+import { Route as TavleIdRouteImport } from './routes/tavle.$id'
+import { Route as TurneringerIdRouteImport } from './routes/turneringer.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiBoardSessionRouteImport } from './routes/api/board/session'
 import { Route as ApiBoardStateRouteImport } from './routes/api/board/state'
@@ -64,6 +71,11 @@ const OpretRoute = OpretRouteImport.update({
   path: '/opret',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResultaterRoute = ResultaterRouteImport.update({
+  id: '/resultater',
+  path: '/resultater',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -77,6 +89,36 @@ const SupportCenterRoute = SupportCenterRouteImport.update({
 const TurneringRoute = TurneringRouteImport.update({
   id: '/turnering',
   path: '/turnering',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KampIdRoute = KampIdRouteImport.update({
+  id: '/kamp/$id',
+  path: '/kamp/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KampNyRoute = KampNyRouteImport.update({
+  id: '/kamp/ny',
+  path: '/kamp/ny',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SportIndexRoute = SportIndexRouteImport.update({
+  id: '/sport/',
+  path: '/sport/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SportSportIdRoute = SportSportIdRouteImport.update({
+  id: '/sport/$sportId',
+  path: '/sport/$sportId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TavleIdRoute = TavleIdRouteImport.update({
+  id: '/tavle/$id',
+  path: '/tavle/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TurneringerIdRoute = TurneringerIdRouteImport.update({
+  id: '/turneringer/$id',
+  path: '/turneringer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -104,9 +146,16 @@ export interface FileRoutesByFullPath {
   '/live': typeof LiveRoute
   '/login': typeof LoginRoute
   '/opret': typeof OpretRoute
+  '/resultater': typeof ResultaterRoute
   '/support': typeof SupportRoute
   '/support-center': typeof SupportCenterRoute
   '/turnering': typeof TurneringRoute
+  '/kamp/$id': typeof KampIdRoute
+  '/kamp/ny': typeof KampNyRoute
+  '/sport/$sportId': typeof SportSportIdRoute
+  '/tavle/$id': typeof TavleIdRoute
+  '/turneringer/$id': typeof TurneringerIdRoute
+  '/sport/': typeof SportIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/board/session': typeof ApiBoardSessionRoute
   '/api/board/state': typeof ApiBoardStateRoute
@@ -120,9 +169,16 @@ export interface FileRoutesByTo {
   '/live': typeof LiveRoute
   '/login': typeof LoginRoute
   '/opret': typeof OpretRoute
+  '/resultater': typeof ResultaterRoute
   '/support': typeof SupportRoute
   '/support-center': typeof SupportCenterRoute
   '/turnering': typeof TurneringRoute
+  '/kamp/$id': typeof KampIdRoute
+  '/kamp/ny': typeof KampNyRoute
+  '/sport/$sportId': typeof SportSportIdRoute
+  '/tavle/$id': typeof TavleIdRoute
+  '/turneringer/$id': typeof TurneringerIdRoute
+  '/sport': typeof SportIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/board/session': typeof ApiBoardSessionRoute
   '/api/board/state': typeof ApiBoardStateRoute
@@ -137,9 +193,16 @@ export interface FileRoutesById {
   '/live': typeof LiveRoute
   '/login': typeof LoginRoute
   '/opret': typeof OpretRoute
+  '/resultater': typeof ResultaterRoute
   '/support': typeof SupportRoute
   '/support-center': typeof SupportCenterRoute
   '/turnering': typeof TurneringRoute
+  '/kamp/$id': typeof KampIdRoute
+  '/kamp/ny': typeof KampNyRoute
+  '/sport/$sportId': typeof SportSportIdRoute
+  '/tavle/$id': typeof TavleIdRoute
+  '/turneringer/$id': typeof TurneringerIdRoute
+  '/sport/': typeof SportIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/board/session': typeof ApiBoardSessionRoute
   '/api/board/state': typeof ApiBoardStateRoute
@@ -155,9 +218,16 @@ export interface FileRouteTypes {
     | '/live'
     | '/login'
     | '/opret'
+    | '/resultater'
     | '/support'
     | '/support-center'
     | '/turnering'
+    | '/kamp/$id'
+    | '/kamp/ny'
+    | '/sport/$sportId'
+    | '/tavle/$id'
+    | '/turneringer/$id'
+    | '/sport/'
     | '/api/auth/$'
     | '/api/board/session'
     | '/api/board/state'
@@ -171,9 +241,16 @@ export interface FileRouteTypes {
     | '/live'
     | '/login'
     | '/opret'
+    | '/resultater'
     | '/support'
     | '/support-center'
     | '/turnering'
+    | '/kamp/$id'
+    | '/kamp/ny'
+    | '/sport/$sportId'
+    | '/tavle/$id'
+    | '/turneringer/$id'
+    | '/sport'
     | '/api/auth/$'
     | '/api/board/session'
     | '/api/board/state'
@@ -187,9 +264,16 @@ export interface FileRouteTypes {
     | '/live'
     | '/login'
     | '/opret'
+    | '/resultater'
     | '/support'
     | '/support-center'
     | '/turnering'
+    | '/kamp/$id'
+    | '/kamp/ny'
+    | '/sport/$sportId'
+    | '/tavle/$id'
+    | '/turneringer/$id'
+    | '/sport/'
     | '/api/auth/$'
     | '/api/board/session'
     | '/api/board/state'
@@ -204,9 +288,16 @@ export interface RootRouteChildren {
   LiveRoute: typeof LiveRoute
   LoginRoute: typeof LoginRoute
   OpretRoute: typeof OpretRoute
+  ResultaterRoute: typeof ResultaterRoute
   SupportRoute: typeof SupportRoute
   SupportCenterRoute: typeof SupportCenterRoute
   TurneringRoute: typeof TurneringRoute
+  KampIdRoute: typeof KampIdRoute
+  KampNyRoute: typeof KampNyRoute
+  SportSportIdRoute: typeof SportSportIdRoute
+  TavleIdRoute: typeof TavleIdRoute
+  TurneringerIdRoute: typeof TurneringerIdRoute
+  SportIndexRoute: typeof SportIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBoardSessionRoute: typeof ApiBoardSessionRoute
   ApiBoardStateRoute: typeof ApiBoardStateRoute
@@ -270,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpretRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resultater': {
+      id: '/resultater'
+      path: '/resultater'
+      fullPath: '/resultater'
+      preLoaderRoute: typeof ResultaterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -289,6 +387,48 @@ declare module '@tanstack/react-router' {
       path: '/turnering'
       fullPath: '/turnering'
       preLoaderRoute: typeof TurneringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kamp/$id': {
+      id: '/kamp/$id'
+      path: '/kamp/$id'
+      fullPath: '/kamp/$id'
+      preLoaderRoute: typeof KampIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kamp/ny': {
+      id: '/kamp/ny'
+      path: '/kamp/ny'
+      fullPath: '/kamp/ny'
+      preLoaderRoute: typeof KampNyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sport/': {
+      id: '/sport/'
+      path: '/sport'
+      fullPath: '/sport/'
+      preLoaderRoute: typeof SportIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sport/$sportId': {
+      id: '/sport/$sportId'
+      path: '/sport/$sportId'
+      fullPath: '/sport/$sportId'
+      preLoaderRoute: typeof SportSportIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tavle/$id': {
+      id: '/tavle/$id'
+      path: '/tavle/$id'
+      fullPath: '/tavle/$id'
+      preLoaderRoute: typeof TavleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/turneringer/$id': {
+      id: '/turneringer/$id'
+      path: '/turneringer/$id'
+      fullPath: '/turneringer/$id'
+      preLoaderRoute: typeof TurneringerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -324,9 +464,16 @@ const rootRouteChildren: RootRouteChildren = {
   LiveRoute: LiveRoute,
   LoginRoute: LoginRoute,
   OpretRoute: OpretRoute,
+  ResultaterRoute: ResultaterRoute,
   SupportRoute: SupportRoute,
   SupportCenterRoute: SupportCenterRoute,
   TurneringRoute: TurneringRoute,
+  KampIdRoute: KampIdRoute,
+  KampNyRoute: KampNyRoute,
+  SportSportIdRoute: SportSportIdRoute,
+  TavleIdRoute: TavleIdRoute,
+  TurneringerIdRoute: TurneringerIdRoute,
+  SportIndexRoute: SportIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBoardSessionRoute: ApiBoardSessionRoute,
   ApiBoardStateRoute: ApiBoardStateRoute,

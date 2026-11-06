@@ -63,6 +63,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <Link to="/live" className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-muted hover:text-fg">
             Live
           </Link>
+          <Link to="/sport" className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-muted hover:text-fg">
+            Sport
+          </Link>
+          <Link to="/resultater" className="inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold text-muted hover:text-fg">
+            Resultater
+          </Link>
           {isPending ? (
             <div className="h-11 w-36 animate-pulse rounded-xl bg-surface-2" />
           ) : user ? (
@@ -140,6 +146,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
               <li><Link to="/opret" className="hover:text-fg">Opret bruger</Link></li>
               <li><Link to="/konto" className="hover:text-fg">Min konto</Link></li>
               <li><Link to="/app" className="hover:text-fg">App</Link></li>
+              <li><Link to="/sport" className="hover:text-fg">Sportsgrene og regler</Link></li>
+              <li><Link to="/resultater" className="hover:text-fg">Resultater</Link></li>
               <li><Link to="/kontakt" className="hover:text-fg">Kontakt</Link></li>
               <li><Link to="/support" search={{ sag: "", k: "" }} className="hover:text-fg">Min support</Link></li>
             </ul>

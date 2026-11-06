@@ -21,6 +21,8 @@ export const PERMISSIONS = [
   "MANAGE_ADMINS",
   "MANAGE_MANAGERS",
   "MANAGE_SUPPORT",
+  "MANAGE_RULES",
+  "APPROVE_RESULTS",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -102,6 +104,8 @@ const SCOREBOARD_SETUP: Permission[] = [
   "DELETE_TOURNAMENT",
   "IMPORT_PLAYERS",
   "EXPORT_RESULTS",
+  "MANAGE_RULES",
+  "APPROVE_RESULTS",
 ];
 
 const ADMIN_PERMS: Permission[] = [
