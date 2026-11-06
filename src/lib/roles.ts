@@ -23,6 +23,7 @@ export const PERMISSIONS = [
   "MANAGE_SUPPORT",
   "MANAGE_RULES",
   "APPROVE_RESULTS",
+  "MANAGE_CONTENT",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -117,6 +118,7 @@ const ADMIN_PERMS: Permission[] = [
   "MANAGE_SOCIAL",
   "MANAGE_ADMINS",
   "MANAGE_SUPPORT",
+  "MANAGE_CONTENT",
 ];
 
 const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
@@ -126,7 +128,7 @@ const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
   administrer_scoreboard: SCOREBOARD_SETUP,
   admin: ADMIN_PERMS,
   administrator_manager: PERMISSIONS,
-  administrer_indstillinger: ["VIEW_PUBLIC", "MANAGE_SETTINGS", "MANAGE_SOCIAL"],
+  administrer_indstillinger: ["VIEW_PUBLIC", "MANAGE_SETTINGS", "MANAGE_SOCIAL", "MANAGE_CONTENT"],
   udlejning: ["VIEW_PUBLIC", "VIEW_OWN_BOARD", "MANAGE_PUBS"],
 };
 
@@ -179,4 +181,9 @@ export function canManageTournament(role: UserRole): boolean {
 
 export function canOpenAdmin(role: UserRole): boolean {
   return hasAnyPermission(role, ["MANAGE_USERS", "MANAGE_PUBS", "MANAGE_SETTINGS", "MANAGE_ROLES"]);
+}
+
+/** Hjemmesidens indhold: sider, sektioner og billeder (CMS). */
+export function canManageContent(role: UserRole): boolean {
+  return hasPermission(role, "MANAGE_CONTENT");
 }

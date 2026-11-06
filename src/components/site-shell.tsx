@@ -7,6 +7,8 @@ import { hasGateSessionMarker } from "@/lib/auth/gate-session-marker";
 import { signOut } from "@/lib/auth/client";
 import { getSiteSettings, getMe, type PublicSettings } from "@/lib/venues";
 import { canOpenBoard, canRunLiveBoard, hasPermission, type UserRole } from "@/lib/roles";
+import { getNavPages } from "@/lib/cms/api";
+import type { NavPage } from "@/lib/cms/schema";
 
 const emptySettings: PublicSettings = {
   facebook: "",
@@ -17,7 +19,7 @@ const emptySettings: PublicSettings = {
 };
 
 /** Huskes mellem sideskift, så menuen ikke blinker, mens rolle og indstillinger hentes igen. */
-const cache: { settings: PublicSettings | null; userId: string | null; role: UserRole | null; status: string } = { settings: null, userId: null, role: null, status: "approved" };
+const cache: { nav: NavPage[] | null; settings: PublicSettings | null; userId: string | null; role: UserRole | null; status: string } = { nav: null, settings: null, userId: null, role: null, status: "approved" };
 
 type NavItem = { to?: string; href?: string; label: string; search?: Record<string, string> };
 
@@ -31,6 +33,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const gate = typeof document !== "undefined" && hasGateSessionMarker();
   const pathname = useRouterState({ select: (st) => st.location.pathname });
   const knownUser = user ?? (isPending && cache.userId ? { id: cache.userId } : null);
+
+  const [navPages, setNavPages] = useState<NavPage[]>(cache.nav ?? []);
+
+  useEffect(() => {
+    getNavPages()
+      .then((x) => { cache.nav = x; setNavPages(x); })
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     getSiteSettings()
@@ -70,13 +80,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   const approved = accountStatus === "approved";
   const board = knownUser && role && canOpenBoard(role) && approved ? { href: "/board.html", label: canRunLiveBoard(role) ? "Scoreboard" : "Min tavle" } : null;
-  const main: NavItem[] = [{ to: "/sport", label: "Sport" }, { to: "/resultater", label: "Resultater" }, { to: "/live", label: "Live" }, ...(knownUser ? [{ to: "/turnering", label: "Turnering" }] : []), { to: "/app", label: "App" }];
+  const main: NavItem[] = [{ to: "/sport", label: "Sport" }, ...navPages.map((p) => ({ href: `/side/${p.slug}`, label: p.title })), { to: "/resultater", label: "Resultater" }, { to: "/live", label: "Live" }, ...(knownUser ? [{ to: "/turnering", label: "Turnering" }] : []), { to: "/app", label: "App" }];
   const extra: NavItem[] = knownUser
     ? [
         { to: "/konto", label: "Min konto" },
         ...(role && canRunLiveBoard(role) && approved ? [{ href: "/board.html#remote", label: "Remote" }] : []),
         ...(role && hasPermission(role, "MANAGE_SUPPORT") ? [{ to: "/support-center", label: "Support" }] : []),
         ...(role && hasPermission(role, "MANAGE_USERS") ? [{ to: "/admin", label: "Admin" }] : []),
+        ...(role && hasPermission(role, "MANAGE_CONTENT") && approved ? [{ to: "/indhold", label: "Rediger hjemmeside" }] : []),
       ]
     : [{ to: "/kontakt", label: "Kontakt" }, { to: "/login", label: "Log ind", search: { next: "/konto" } }];
   const linkCls = (active: boolean) => `inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold ${active ? "bg-surface-2 text-fg" : "text-muted hover:text-fg"}`;
@@ -133,7 +144,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         ) : null}
       </header>
       <main className="flex-1">{children}</main>
-      <footer className="border-t border-line bg-deep">
+      <footer className="border-t border-line bg-surface-2">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <img src="/branding/logo-nav.png" alt="" className="mb-3 h-14 w-auto object-contain" />
@@ -152,6 +163,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               <li><Link to="/sport" className="hover:text-fg">Sportsgrene og regler</Link></li>
               <li><Link to="/resultater" className="hover:text-fg">Resultater</Link></li>
               <li><Link to="/kontakt" className="hover:text-fg">Kontakt</Link></li>
+              {navPages.map((p) => <li key={p.slug}><a href={`/side/${p.slug}`} className="hover:text-fg">{p.title}</a></li>)}
               <li><Link to="/support" search={{ sag: "", k: "" }} className="hover:text-fg">Min support</Link></li>
             </ul>
           </div>
