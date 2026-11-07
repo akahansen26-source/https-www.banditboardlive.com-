@@ -41,7 +41,7 @@ export function Field({
 }
 
 export const inputClass =
-  "min-h-12 w-full rounded-xl border border-line bg-deep px-3 text-base text-fg outline-none focus-visible:border-primary";
+  "min-h-12 w-full rounded-xl border border-line bg-surface px-3 text-base text-fg outline-none focus-visible:border-primary";
 
 export function Submit({ children, pending }: { children: ReactNode; pending: boolean }) {
   return (

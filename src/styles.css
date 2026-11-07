@@ -1,6 +1,26 @@
 @import "tailwindcss";
 
 @theme {
+  /* Lys, varm hjemmeside: offwhite, sand og dæmpet grøn. */
+  --color-bg: #f7f4ee;
+  --color-surface: #ffffff;
+  --color-surface-2: #efeae0;
+  --color-deep: #ebe5d9;
+  --color-fg: #1f2622;
+  --color-muted: #5d665f;
+  --color-primary: #3d6b52;
+  --color-primary-fg: #ffffff;
+  --color-accent: #8a6a3a;
+  --color-line: #ddd5c6;
+  --color-danger: #b42318;
+  --color-ok: #2f7d4f;
+  --font-sans: "Archivo", system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --radius-card: 1rem;
+}
+
+/* Scoreboard/TV beholder det mørke, høj-kontrast udtryk. */
+.theme-dark {
   --color-bg: #070d1f;
   --color-surface: #0e1830;
   --color-surface-2: #14223f;
@@ -13,9 +33,8 @@
   --color-line: #1f3057;
   --color-danger: #ef4444;
   --color-ok: #22c55e;
-  --font-sans: "Archivo", system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --radius-card: 1.125rem;
+  background: var(--color-bg);
+  color: var(--color-fg);
 }
 
 @layer base {

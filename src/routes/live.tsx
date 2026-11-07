@@ -83,7 +83,7 @@ function MatchBoard({ match }: { match: Match }) {
   const [left, right] = match.sides;
   const many = match.sides.length > 2;
   return (
-    <article className="overflow-hidden rounded-2xl border border-[#e7b48c]/35 bg-[#0c172d] shadow-[0_18px_50px_-28px_rgba(0,0,0,.8)]">
+    <article className="theme-dark overflow-hidden rounded-2xl border border-[#e7b48c]/35 bg-[#0c172d] shadow-[0_18px_50px_-28px_rgba(0,0,0,.8)]">
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-[#10182a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#d6e0f0]">
         <span>{match.tour}</span>
         <span className="text-[#b8734a]">·</span>

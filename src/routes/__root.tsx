@@ -12,8 +12,8 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: APP_NAME },
-      { name: "description", content: "Live scoreboard til billard, dart og turneringer. Lån tavlen ud til pubben eller kør klubaftenen på TV." },
-      { name: "theme-color", content: "#070D1F" },
+      { name: "description", content: "Live scoreboard til billard, dart og over 35 sportsgrene. Kør klubaftenen, turneringen og storskærmen fra én konto." },
+      { name: "theme-color", content: "#F7F4EE" },
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },

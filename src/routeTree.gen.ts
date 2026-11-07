@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as IndholdRouteImport } from './routes/indhold'
 import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as KontoRouteImport } from './routes/konto'
 import { Route as LiveRouteImport } from './routes/live'
@@ -23,6 +24,7 @@ import { Route as SupportCenterRouteImport } from './routes/support-center'
 import { Route as TurneringRouteImport } from './routes/turnering'
 import { Route as KampIdRouteImport } from './routes/kamp.$id'
 import { Route as KampNyRouteImport } from './routes/kamp.ny'
+import { Route as SideSlugRouteImport } from './routes/side.$slug'
 import { Route as SportIndexRouteImport } from './routes/sport.index'
 import { Route as SportSportIdRouteImport } from './routes/sport.$sportId'
 import { Route as TavleIdRouteImport } from './routes/tavle.$id'
@@ -30,6 +32,7 @@ import { Route as TurneringerIdRouteImport } from './routes/turneringer.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiBoardSessionRouteImport } from './routes/api/board/session'
 import { Route as ApiBoardStateRouteImport } from './routes/api/board/state'
+import { Route as ApiMediaIdRouteImport } from './routes/api/media/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -44,6 +47,11 @@ const AdminRoute = AdminRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndholdRoute = IndholdRouteImport.update({
+  id: '/indhold',
+  path: '/indhold',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KontaktRoute = KontaktRouteImport.update({
@@ -101,6 +109,11 @@ const KampNyRoute = KampNyRouteImport.update({
   path: '/kamp/ny',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SideSlugRoute = SideSlugRouteImport.update({
+  id: '/side/$slug',
+  path: '/side/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SportIndexRoute = SportIndexRouteImport.update({
   id: '/sport/',
   path: '/sport/',
@@ -136,11 +149,17 @@ const ApiBoardStateRoute = ApiBoardStateRouteImport.update({
   path: '/api/board/state',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMediaIdRoute = ApiMediaIdRouteImport.update({
+  id: '/api/media/$id',
+  path: '/api/media/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
+  '/indhold': typeof IndholdRoute
   '/kontakt': typeof KontaktRoute
   '/konto': typeof KontoRoute
   '/live': typeof LiveRoute
@@ -152,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/turnering': typeof TurneringRoute
   '/kamp/$id': typeof KampIdRoute
   '/kamp/ny': typeof KampNyRoute
+  '/side/$slug': typeof SideSlugRoute
   '/sport/$sportId': typeof SportSportIdRoute
   '/tavle/$id': typeof TavleIdRoute
   '/turneringer/$id': typeof TurneringerIdRoute
@@ -159,11 +179,13 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/board/session': typeof ApiBoardSessionRoute
   '/api/board/state': typeof ApiBoardStateRoute
+  '/api/media/$id': typeof ApiMediaIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
+  '/indhold': typeof IndholdRoute
   '/kontakt': typeof KontaktRoute
   '/konto': typeof KontoRoute
   '/live': typeof LiveRoute
@@ -175,6 +197,7 @@ export interface FileRoutesByTo {
   '/turnering': typeof TurneringRoute
   '/kamp/$id': typeof KampIdRoute
   '/kamp/ny': typeof KampNyRoute
+  '/side/$slug': typeof SideSlugRoute
   '/sport/$sportId': typeof SportSportIdRoute
   '/tavle/$id': typeof TavleIdRoute
   '/turneringer/$id': typeof TurneringerIdRoute
@@ -182,12 +205,14 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/board/session': typeof ApiBoardSessionRoute
   '/api/board/state': typeof ApiBoardStateRoute
+  '/api/media/$id': typeof ApiMediaIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRoute
+  '/indhold': typeof IndholdRoute
   '/kontakt': typeof KontaktRoute
   '/konto': typeof KontoRoute
   '/live': typeof LiveRoute
@@ -199,6 +224,7 @@ export interface FileRoutesById {
   '/turnering': typeof TurneringRoute
   '/kamp/$id': typeof KampIdRoute
   '/kamp/ny': typeof KampNyRoute
+  '/side/$slug': typeof SideSlugRoute
   '/sport/$sportId': typeof SportSportIdRoute
   '/tavle/$id': typeof TavleIdRoute
   '/turneringer/$id': typeof TurneringerIdRoute
@@ -206,6 +232,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/board/session': typeof ApiBoardSessionRoute
   '/api/board/state': typeof ApiBoardStateRoute
+  '/api/media/$id': typeof ApiMediaIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -213,6 +240,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/app'
+    | '/indhold'
     | '/kontakt'
     | '/konto'
     | '/live'
@@ -224,6 +252,7 @@ export interface FileRouteTypes {
     | '/turnering'
     | '/kamp/$id'
     | '/kamp/ny'
+    | '/side/$slug'
     | '/sport/$sportId'
     | '/tavle/$id'
     | '/turneringer/$id'
@@ -231,11 +260,13 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/board/session'
     | '/api/board/state'
+    | '/api/media/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/app'
+    | '/indhold'
     | '/kontakt'
     | '/konto'
     | '/live'
@@ -247,6 +278,7 @@ export interface FileRouteTypes {
     | '/turnering'
     | '/kamp/$id'
     | '/kamp/ny'
+    | '/side/$slug'
     | '/sport/$sportId'
     | '/tavle/$id'
     | '/turneringer/$id'
@@ -254,11 +286,13 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/board/session'
     | '/api/board/state'
+    | '/api/media/$id'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/app'
+    | '/indhold'
     | '/kontakt'
     | '/konto'
     | '/live'
@@ -270,6 +304,7 @@ export interface FileRouteTypes {
     | '/turnering'
     | '/kamp/$id'
     | '/kamp/ny'
+    | '/side/$slug'
     | '/sport/$sportId'
     | '/tavle/$id'
     | '/turneringer/$id'
@@ -277,12 +312,14 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/board/session'
     | '/api/board/state'
+    | '/api/media/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRoute
+  IndholdRoute: typeof IndholdRoute
   KontaktRoute: typeof KontaktRoute
   KontoRoute: typeof KontoRoute
   LiveRoute: typeof LiveRoute
@@ -294,6 +331,7 @@ export interface RootRouteChildren {
   TurneringRoute: typeof TurneringRoute
   KampIdRoute: typeof KampIdRoute
   KampNyRoute: typeof KampNyRoute
+  SideSlugRoute: typeof SideSlugRoute
   SportSportIdRoute: typeof SportSportIdRoute
   TavleIdRoute: typeof TavleIdRoute
   TurneringerIdRoute: typeof TurneringerIdRoute
@@ -301,6 +339,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBoardSessionRoute: typeof ApiBoardSessionRoute
   ApiBoardStateRoute: typeof ApiBoardStateRoute
+  ApiMediaIdRoute: typeof ApiMediaIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -324,6 +363,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/indhold': {
+      id: '/indhold'
+      path: '/indhold'
+      fullPath: '/indhold'
+      preLoaderRoute: typeof IndholdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kontakt': {
@@ -403,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KampNyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/side/$slug': {
+      id: '/side/$slug'
+      path: '/side/$slug'
+      fullPath: '/side/$slug'
+      preLoaderRoute: typeof SideSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sport/': {
       id: '/sport/'
       path: '/sport'
@@ -452,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBoardStateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/media/$id': {
+      id: '/api/media/$id'
+      path: '/api/media/$id'
+      fullPath: '/api/media/$id'
+      preLoaderRoute: typeof ApiMediaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -459,6 +519,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AppRoute: AppRoute,
+  IndholdRoute: IndholdRoute,
   KontaktRoute: KontaktRoute,
   KontoRoute: KontoRoute,
   LiveRoute: LiveRoute,
@@ -470,6 +531,7 @@ const rootRouteChildren: RootRouteChildren = {
   TurneringRoute: TurneringRoute,
   KampIdRoute: KampIdRoute,
   KampNyRoute: KampNyRoute,
+  SideSlugRoute: SideSlugRoute,
   SportSportIdRoute: SportSportIdRoute,
   TavleIdRoute: TavleIdRoute,
   TurneringerIdRoute: TurneringerIdRoute,
@@ -477,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBoardSessionRoute: ApiBoardSessionRoute,
   ApiBoardStateRoute: ApiBoardStateRoute,
+  ApiMediaIdRoute: ApiMediaIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

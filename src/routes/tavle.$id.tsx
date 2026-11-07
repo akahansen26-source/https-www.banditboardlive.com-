@@ -60,7 +60,7 @@ function LiveBoard() {
   }
 
   return (
-    <div className="grid min-h-screen content-start gap-6 bg-bg p-6 text-fg sm:p-10">
+    <div className="theme-dark grid min-h-screen content-start gap-6 bg-bg p-6 text-fg sm:p-10">
       <header className="flex flex-wrap items-end gap-3">
         <div className="mr-auto">
           <p className="font-display text-xl tracking-widest text-primary">BANDITBOARD LIVE · {sport.emoji} {sport.name.toUpperCase()}</p>
