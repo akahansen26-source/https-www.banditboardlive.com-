@@ -22,6 +22,7 @@ import { Route as ResultaterRouteImport } from './routes/resultater'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SupportCenterRouteImport } from './routes/support-center'
 import { Route as TurneringRouteImport } from './routes/turnering'
+import { Route as ApiSportsRouteImport } from './routes/api/sports'
 import { Route as KampIdRouteImport } from './routes/kamp.$id'
 import { Route as KampNyRouteImport } from './routes/kamp.ny'
 import { Route as SideSlugRouteImport } from './routes/side.$slug'
@@ -99,6 +100,11 @@ const TurneringRoute = TurneringRouteImport.update({
   path: '/turnering',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSportsRoute = ApiSportsRouteImport.update({
+  id: '/api/sports',
+  path: '/api/sports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KampIdRoute = KampIdRouteImport.update({
   id: '/kamp/$id',
   path: '/kamp/$id',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/support-center': typeof SupportCenterRoute
   '/turnering': typeof TurneringRoute
+  '/api/sports': typeof ApiSportsRoute
   '/kamp/$id': typeof KampIdRoute
   '/kamp/ny': typeof KampNyRoute
   '/side/$slug': typeof SideSlugRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/support-center': typeof SupportCenterRoute
   '/turnering': typeof TurneringRoute
+  '/api/sports': typeof ApiSportsRoute
   '/kamp/$id': typeof KampIdRoute
   '/kamp/ny': typeof KampNyRoute
   '/side/$slug': typeof SideSlugRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/support-center': typeof SupportCenterRoute
   '/turnering': typeof TurneringRoute
+  '/api/sports': typeof ApiSportsRoute
   '/kamp/$id': typeof KampIdRoute
   '/kamp/ny': typeof KampNyRoute
   '/side/$slug': typeof SideSlugRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/support-center'
     | '/turnering'
+    | '/api/sports'
     | '/kamp/$id'
     | '/kamp/ny'
     | '/side/$slug'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/support-center'
     | '/turnering'
+    | '/api/sports'
     | '/kamp/$id'
     | '/kamp/ny'
     | '/side/$slug'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/support-center'
     | '/turnering'
+    | '/api/sports'
     | '/kamp/$id'
     | '/kamp/ny'
     | '/side/$slug'
@@ -329,6 +341,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   SupportCenterRoute: typeof SupportCenterRoute
   TurneringRoute: typeof TurneringRoute
+  ApiSportsRoute: typeof ApiSportsRoute
   KampIdRoute: typeof KampIdRoute
   KampNyRoute: typeof KampNyRoute
   SideSlugRoute: typeof SideSlugRoute
@@ -435,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TurneringRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sports': {
+      id: '/api/sports'
+      path: '/api/sports'
+      fullPath: '/api/sports'
+      preLoaderRoute: typeof ApiSportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kamp/$id': {
       id: '/kamp/$id'
       path: '/kamp/$id'
@@ -529,6 +549,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   SupportCenterRoute: SupportCenterRoute,
   TurneringRoute: TurneringRoute,
+  ApiSportsRoute: ApiSportsRoute,
   KampIdRoute: KampIdRoute,
   KampNyRoute: KampNyRoute,
   SideSlugRoute: SideSlugRoute,
