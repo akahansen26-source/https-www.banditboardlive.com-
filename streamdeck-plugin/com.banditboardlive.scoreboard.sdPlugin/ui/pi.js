@@ -27,6 +27,7 @@ window.connectElgatoStreamDeckSocket = function (port, inUUID, registerEvent, in
 function paintGlobals() {
   $("server").value = globals.server || "https://www.banditboardlive.com";
   $("token").value = globals.token || "";
+  if ($("auto")) $("auto").value = globals.autoLayout || "";
 }
 function paintRemote() {
   const el = $("conn");
@@ -43,5 +44,6 @@ function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => (
 document.addEventListener("DOMContentLoaded", () => {
   $("token").addEventListener("change", () => { globals.token = $("token").value.trim(); saveGlobals(); $("conn").textContent = "Forbinder …"; });
   $("server").addEventListener("change", () => { globals.server = $("server").value.trim(); saveGlobals(); });
+  if ($("auto")) $("auto").addEventListener("change", () => { globals.autoLayout = $("auto").value; saveGlobals(); });
   $("refresh").addEventListener("click", () => { $("conn").textContent = "Henter …"; toPlugin({ event: "refresh" }); });
 });
