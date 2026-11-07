@@ -141,7 +141,7 @@ input[type=number]{width:110px}
 :root[data-font="modern"] .score{font-weight:900;letter-spacing:-.04em}
 .bump{animation:bump .5s cubic-bezier(.2,.9,.3,1.35)}
 @keyframes bump{0%{transform:scale(.82);color:var(--a2)}60%{color:var(--a2)}100%{transform:scale(1)}}
-.meta{margin-top:10px;display:flex;gap:18px;color:var(--muted);font-weight:600;font-size:14px}
+.meta{margin-top:10px;display:flex;gap:18px;color:var(--muted);font-weight:600;font-size:14px}.skmeta b{color:#F87171}
 .meta b{font:800 20px var(--disp);color:var(--a1)}
 .side.md{background:linear-gradient(180deg,var(--panel2),var(--panel))}
 .mdh{display:flex;align-items:center;gap:10px}
@@ -1090,7 +1090,7 @@ const fmtDelta=v=>v>0?'+'+v:v<0?'−'+Math.abs(v):'0';
 const avatar=(p,c='')=>p.photo?`<img class="av ${c}" src="${p.photo}" alt="">`:`<span class="av ini ${c}" aria-hidden="true">${esc(initials(p))}</span>`;
 const tAvatar=(t,c='')=>t&&t.photo?`<img class="av ${c}" src="${t.photo}" alt="">`:`<span class="av ini ${c}" aria-hidden="true">${esc(((t&&t.name)||'?').replace(/^team\s+/i,'').slice(0,2).toUpperCase())}</span>`;
 const skSide=s=>{const v=s.pids.map(p=>(s.sk||{})[p]||0);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0};
-const skChip=(s,pid)=>{const v=(s.sk||{})[pid]||0;if(!vis('sk'))return '';return v?`<span class="skv ${v<0?'n':'p'}">${fmtDelta(v)}</span>`:''};
+const skLab=v=>v<0?'Skæve '+(-v):fmtDelta(v),skChip=(s,pid)=>{const v=(s.sk||{})[pid]||0;if(!vis('sk'))return '';return v?`<span class="skv ${v<0?'n':'p'}">${skLab(v)}</span>`:''};
 const capMark=(s,pid)=>s.teamId&&T(s.teamId)&&T(s.teamId).captain===pid?'<span class="cap" title="Kaptajn">K</span>':'';
 const innings=g=>Math.floor(g.sides.reduce((a,s)=>a+s.rounds.length,0)/g.sides.length)+1;
 const pv=x=>typeof x==='number'?x:(x&&x.v)||0;
@@ -1165,10 +1165,10 @@ return `<article class="side ${on?'on':''} ${s.place?'locked':''} ${g.over&&g.wi
 ${s.teamId&&T(s.teamId)?`<div class="thead">${tAvatar(T(s.teamId))}<b>${esc(T(s.teamId).name)}</b></div>`:''}<div class="who">${s.pids.map((id,j)=>{const p=P(id);return `<div class="pl ${isActP(g,s,id)?'shoot':''} ${!on&&s.pids.length>1&&j===sh&&!g.over?'nextup':''}">${avatar(p,'lg')}<div><b>${esc(fullName(p))}${capMark(s,id)}${skChip(s,id)}${isActP(g,s,id)&&s.pids.length>1?'<span class="dintur">DIN TUR</span>':''}</b>${p.club?`<small>${esc(p.club)}</small>`:''}${p.sponsor?`<em>${esc(p.sponsor)}</em>`:''}</div></div>`}).join('')}</div>
 <div class="lastr ${last?last.c||'':''}">${last&&vis('feed')?esc(last.t):''}</div>
 <div class="score ${bump(s)}">${s.score}</div>
-<div class="meta">${g.mode==='kegle'?kStats(s,g):`<span>Start: ${g.startLabel}</span>`}</div></article>`}
+<div class="meta">${g.mode==='kegle'?kStats(s,g):`<span>Start: ${g.startLabel}</span>`}${skTotal(s)?`<span class="skmeta">Skæve: <b>${skTotal(s)}</b></span>`:''}</div></article>`}
 
 function sideModern(s,i,g){const on=i===g.turn&&!g.over;
-return `<article class="side md ${on?'on':''} ${s.place?'locked':''} ${g.over&&g.winner===s.id?'won':''}" ${g.mode==='point'&&!g.over?`data-act="psel" data-v="${i}"`:''}>${s.place?`<span class="lock-tag">🔒 Nr. ${s.place}</span>`:''}${g.over&&g.loser===s.id?'<span class="lock-tag last">Sidst</span>':''}${g.elim&&!g.over?`<button class="lockbtn" data-act="lock" data-v="${s.id}" aria-label="${s.place?'Lås op':'Lås'} ${esc(sideName(s))}">${s.place?'Lås op':'Lås'}</button>`:''}<div class="mdh">${avatar(shooter(s))}<b>${esc(s.pids.length>1?shooter(s).first+' ('+sideName(s)+')':sideName(s))}</b>${vis('sk')&&skSide(s)?`<span class="skv ${skSide(s)<0?'n':'p'}">${fmtDelta(skSide(s))}</span>`:''}${on?'<span class="dot" aria-label="Din tur"></span>':''}${g.over&&g.winner===s.id?'<span class="won-tag" style="position:static;margin-left:auto">Vinder</span>':''}</div>
+return `<article class="side md ${on?'on':''} ${s.place?'locked':''} ${g.over&&g.winner===s.id?'won':''}" ${g.mode==='point'&&!g.over?`data-act="psel" data-v="${i}"`:''}>${s.place?`<span class="lock-tag">🔒 Nr. ${s.place}</span>`:''}${g.over&&g.loser===s.id?'<span class="lock-tag last">Sidst</span>':''}${g.elim&&!g.over?`<button class="lockbtn" data-act="lock" data-v="${s.id}" aria-label="${s.place?'Lås op':'Lås'} ${esc(sideName(s))}">${s.place?'Lås op':'Lås'}</button>`:''}<div class="mdh">${avatar(shooter(s))}<b>${esc(s.pids.length>1?shooter(s).first+' ('+sideName(s)+')':sideName(s))}</b>${vis('sk')&&skSide(s)?`<span class="skv ${skSide(s)<0?'n':'p'}">${skLab(skSide(s))}</span>`:''}${on?'<span class="dot" aria-label="Din tur"></span>':''}${g.over&&g.winner===s.id?'<span class="won-tag" style="position:static;margin-left:auto">Vinder</span>':''}</div>
 ${rosterHTML(g,s,'md')}<div class="score ${bump(s)}">${s.score}</div>
 ${vis('feed')?`<div class="rds">${feedHTML(s,6)||'<i class="mut">Ingen stød endnu</i>'}</div>`:''}
 ${g.mode==='kegle'?`<div class="meta">${kStats(s,g)}</div>`:''}</article>`}
@@ -1959,22 +1959,23 @@ function settle(g,list){const hit=list.filter(x=>!x.place&&gainDone(g,x));if(!hi
  const best=[...hit].sort((a,b)=>g.dir==='down'?a.score-b.score:b.score-a.score)[0];endGame(g,best.id)}
 
 /* ---------- skæve: den der laver skæve får minus, ALLE andre spillere får pointene ---------- */
+function skTotal(s){return -Object.values(s.sk||{}).reduce((a,b)=>a+(b<0?b:0),0)}
 function skTarget(g){return g.skSide&&side(g,g.skSide)?g.skSide:g.sides[g.turn].id}
 function skBar(g){if(!vis('sk'))return '';const t=skTarget(g);
 return `<div class="skbar"><div class="skhead"><span>Minuspoint / skæve – hvem lavede dem?</span><div class="skt">${g.sides.map(s=>`<button class="${s.id===t?'on':''}" data-act="sktgt" data-v="${s.id}">${esc(sideName(s))}</button>`).join('')}</div></div>
 <div class="keys k4 skk">${[2,4,6,8,10,12,14,16].map(n=>`<button class="neg" data-act="sk" data-v="${n}">−${n}</button>`).join('')}</div>
 <div class="skcustom pc1"><input id="skval" autocomplete="off" inputmode="text" enterkeyhint="done" placeholder="Skriv minuspoint, fx -6" aria-label="Manuelt minuspoint"><button class="pent" data-act="skc">Enter ↵</button><button class="undoshot" data-act="undo" style="min-height:52px;font-size:16px">Fortryd</button></div>
-<small class="sknote">Skriv fx <b>-6</b> og tryk Enter: den valgte spiller får −6, og modstanderne får 6 point${g.dir==='down'?' (trækkes fra deres rest)':' (+6)'}. Fortryd med ✕ / Fortryd.</small></div>`}
+<small class="sknote">Skriv fx <b>-6</b> og tryk Enter: den valgte spiller får 6 skæve (egne point ændres ikke), og modstanderne får 6 point${g.dir==='down'?' (trækkes fra deres rest)':' (+6)'}. Fortryd med ✕ / Fortryd.</small></div>`}
 function syncHistSk(g){if(!g||!g.over)return;const h=S.history.find(x=>x.gid===g.id);if(h)h.rev=(h.rev||0)+1;if(h)h.sides.forEach((sd,i)=>{if(g.sides[i]){sd.sk=Object.assign({},g.sides[i].sk||{});sd.score=g.sides[i].score}})}
 function giveSk(g,off,n,opt){opt=opt||{};if(!off||!(n>0))return;if(!opt.noUndo)pushUndo();
- const pid=shooter(off).id,lbl=opt.manual?'Manuelt minuspoint':'Skæve';off.sk=off.sk||{};off.sk[pid]=(off.sk[pid]||0)-n;off.feed.push({t:(opt.manual?'−'+n+' minus':'×'+n+' skæve'),c:'n'});
+ const pid=shooter(off).id,lbl=opt.manual?'Manuelt minuspoint':'Skæve';off.sk=off.sk||{};off.sk[pid]=(off.sk[pid]||0)-n;off.feed.push({t:n+' skæve',c:'n'});
  const grp=uid(),rec=g.sides.filter(x=>x.id!==off.id&&!x.place);
  g.plog=g.plog||[];plogAdd(g,off,0,off.score,off.score,{foul:true,grp,sk:-n,manual:!!opt.manual,playerId:pid,playerName:fullName(P(pid)),note:lbl+' '+fmtDelta(-n),skOff:{sid:off.id,pid,n}});
  rec.forEach((x,i)=>{const o=x.score;x.score=g.dir==='down'?Math.max(0,o-n):o+n;x.feed.push({t:(g.dir==='down'?'−':'+')+n+(opt.manual?' (manuelt)':' fra skæve'),c:'g'});
   plogAdd(g,x,x.score-o,o,x.score,{foul:true,grp,manual:!!opt.manual,note:lbl+' fra '+fullName(P(pid))})});
  logA(opt.manual?`Manuelt minuspoint: ${fullName(P(pid))} −${n}`:`Skæve: ${fullName(P(pid))} lavede ${n}`,`${n} point til ${rec.map(x=>`${sideName(x)} (${g.dir==='down'?x.score+n:x.score-n} → ${x.score})`).join(', ')||'ingen'}`);
  syncHistSk(g);settle(g,rec);
- if(!opt.noSave){toast(`${P(pid).first} −${n} skæve · +${n} til ${rec.length>1?'alle andre':rec.map(sideName).join('')}`);save();render()}}
+ if(!opt.noSave){toast(`${P(pid).first}: ${n} skæve · +${n} til ${rec.length>1?'alle andre':rec.map(sideName).join('')}`);save();render()}}
 // Manuelt minuspoint: kun hele negative tal (fx -6). Afviser tekst, 0, positive tal og fx "--", "- -", "6-", "-abc".
 function skParse(v){const t=String(v==null?'':v).trim().replace(/[−–—]/g,'-');
  if(!t)return {err:'Skriv et minus-tal, fx -6'};
@@ -2188,7 +2189,7 @@ ${hfl.q||hfl.sport!=='all'||hfl.status!=='all'||hfl.per!=='all'||hfl.tour!=='all
 <div id="htable">${hTable()}</div>`}
 
 function hDetail(id){const h=S.history.find(x=>x.id===id);if(!h)return;
-const rows=h.sides.map(s=>{const pl=(s.pids||[]).map((pid,i)=>{const v=(s.sk||{})[pid]||0;return `${esc((s.names||[])[i]||fullName(P(pid)))}${v?` <span class="skv ${v<0?'n':'p'}">${fmtDelta(v)}</span>`:''}`}).join(', ');
+const rows=h.sides.map(s=>{const pl=(s.pids||[]).map((pid,i)=>{const v=(s.sk||{})[pid]||0;return `${esc((s.names||[])[i]||fullName(P(pid)))}${v?` <span class="skv ${v<0?'n':'p'}">${skLab(v)}</span>`:''}`}).join(', ');
  return `<tr><td><b>${esc(sdName(s))}</b>${s.team?`<br><small class="mut">${pl}</small>`:pl.includes('skv')?`<br><small>${pl}</small>`:''}</td><td class="r"><b>${s.score}</b></td><td>${s.won?'Vinder':s.last?'Sidst':s.place?'Nr. '+s.place:''}</td><td><small class="mut">${(s.feed||[]).map(f=>esc(f.t)).join(' · ')||(s.rounds||[]).map(fmtDelta).join(' · ')||'–'}</small></td></tr>`}).join('');
 openModal(`<h2>${esc(h.tour||'Kamp')}</h2><p class="mut">${fmtDate(h.at)} · ${sportName(h.mode)}${h.mode==='dart'?` · bedst af ${h.dart?h.dart.bestOf:'?'} legs${h.dart&&h.dart.setsBestOf?' / '+h.dart.setsBestOf+' sæt':''} · resultat i ${h.dart&&h.dart.setsBestOf?'sæt':'legs'}`:h.mode==='kegle'?' · mål '+(h.target||h.startLabel):h.mode==='point'?(h.target?' · mål '+h.target:''):' · '+h.startLabel}${h.elim?' · udspil':''} · ${hStatus(h)}${h.edited?` · rettet af ${esc(h.edited.user)} ${fmtDate(h.edited.at)}`:''}</p>
 <div class="tscroll"><table class="rtable dtab"><thead><tr><th>Spiller / hold</th><th>Point</th><th>Resultat</th><th>Stød / serier</th></tr></thead><tbody>${rows}</tbody></table></div>${h.plog&&h.plog.length?plogHTML(h,50):''}
@@ -2647,7 +2648,7 @@ case 'lock':if(g&&!g.over){const x=side(g,v);pushUndo();if(x.place)unlockSide(g,
 case 'no':{const f=pendingNo;pendingNo=null;pendingYes=null;closeModal();f&&f();break}
 case 'dig':if(live()&&g.entry.replace('-','').length<3){g.entry=(g.entry==='0'?'':g.entry)+v;save();render()}break;
 case 'bk':if(live()){g.entry=g.entry.slice(0,-1);save();render()}break;
-case 'plus':if(live()&&ev(g)){pushUndo();g.pending.push({v:ev(g),k:null});g.entry='';save();render()}break;
+case 'plus':if(live()&&ev(g)){if(ev(g)<0&&minusOpp()){const n=-ev(g);g.entry='';giveSk(g,g.sides[g.turn],n,{manual:true});break}pushUndo();g.pending.push({v:ev(g),k:null});g.entry='';save();render()}break;
 case 'kent':if(live()){const n=ev(g);if(!n){toast(g.entry==='-'?'Skriv et tal efter minus, fx −6':'Skriv et tal først');break}
  if(n<0&&minusOpp()){g.entry='';giveSk(g,g.sides[g.turn],-n,{manual:true})}else act('plus')}break;
 case 'sign':if(live()){g.entry=g.entry.startsWith('-')?g.entry.slice(1):'-'+g.entry;save();render()}break;
