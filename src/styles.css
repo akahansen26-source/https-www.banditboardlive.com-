@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  /* Lys, varm hjemmeside: offwhite, sand og dæmpet grøn. */
-  --color-bg: #f7f4ee;
-  --color-surface: #ffffff;
-  --color-surface-2: #efeae0;
-  --color-deep: #ebe5d9;
-  --color-fg: #1f2622;
-  --color-muted: #5d665f;
-  --color-primary: #3d6b52;
-  --color-primary-fg: #ffffff;
-  --color-accent: #8a6a3a;
-  --color-line: #ddd5c6;
-  --color-danger: #b42318;
-  --color-ok: #2f7d4f;
+  /* Arena Live: kul-grå baggrund, blågrå kort, orange live/knapper og cyan fremhævning. */
+  --color-bg: #12161f;
+  --color-surface: #1a2332;
+  --color-surface-2: #1f2938;
+  --color-deep: #0e1219;
+  --color-fg: #e8e8e8;
+  --color-heading: #ffffff;
+  --color-muted: #a3afbf;
+  --color-primary: #ff5a1f;
+  --color-primary-fg: #12161f;
+  --color-accent: #00d4ff;
+  --color-line: #2a3547;
+  --color-danger: #ff6b6b;
+  --color-ok: #3ddc84;
   --font-sans: "Archivo", system-ui, sans-serif;
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --radius-card: 1rem;
@@ -25,6 +26,7 @@
   --color-surface: #0e1830;
   --color-surface-2: #14223f;
   --color-deep: #050a17;
+  --color-heading: #ffffff;
   --color-fg: #e8eef7;
   --color-muted: #94a3b8;
   --color-primary: #19c3ff;
@@ -63,6 +65,7 @@
     font-weight: 800;
     letter-spacing: 0.01em;
     line-height: 0.95;
+    color: var(--color-heading);
   }
 
   a {
@@ -74,4 +77,9 @@
       scroll-behavior: auto;
     }
   }
+}
+
+/* Kun demo-/live-elementer får en svag glød. */
+.arena-glow {
+  box-shadow: 0 0 0 1px rgb(255 90 31 / 0.18), 0 18px 50px -24px rgb(0 212 255 / 0.35), 0 10px 40px -28px rgb(255 90 31 / 0.45);
 }

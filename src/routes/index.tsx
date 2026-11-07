@@ -95,22 +95,35 @@ function AccountButtons() {
   );
 }
 
+/** Illustration: en fiktiv demokamp, tydeligt mærket, så ingen tror det er et rigtigt resultat. */
 function Showcase() {
   return (
-    <div className="rounded-[1.5rem] border border-line bg-surface p-5 shadow-[0_30px_60px_-40px_rgba(31,38,34,0.45)]">
-      <div className="theme-dark rounded-2xl p-4">
-        <div className="grid grid-cols-2 gap-3">
-          <ScoreSample name="Sanderum" score="47" live />
-          <ScoreSample name="Ullerslev" score="39" />
-        </div>
-        <p className="mt-3 text-center font-display text-lg tracking-wide text-muted">BORD 1 · SKOMAGER · RUNDE 4</p>
+    <figure className="arena-glow rounded-[1.5rem] border border-line bg-surface p-5" aria-label="Demo-scoreboard med en fiktiv kamp">
+      <div className="flex items-center justify-between">
+        <span className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary-fg">
+          <span aria-hidden="true" className="size-1.5 rounded-full bg-primary-fg" />Live · Demo
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-accent">Fodbold</span>
       </div>
+      <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center text-center">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Hjemme</p>
+          <p className="mt-1 font-display text-7xl text-primary">2</p>
+        </div>
+        <span aria-hidden="true" className="font-display text-4xl text-fg">:</span>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Ude</p>
+          <p className="mt-1 font-display text-7xl text-accent">1</p>
+        </div>
+      </div>
+      <p className="mt-2 text-center font-display text-2xl tracking-wide text-heading">67:24</p>
       <dl className="mt-5 grid grid-cols-3 gap-3 text-center">
         <Stat value={String(SPORTS.length)} label="sportsgrene" />
         <Stat value="1920×1080" label="TV og OBS" />
         <Stat value="Live" label="på nettet" />
       </dl>
-    </div>
+      <figcaption className="mt-4 text-center text-xs text-muted">Illustration — kamp og resultat er fiktive.</figcaption>
+    </figure>
   );
 }
 
@@ -127,20 +140,8 @@ function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="rounded-xl bg-surface-2 px-2 py-3">
       <dt className="sr-only">{label}</dt>
-      <dd className="font-display text-2xl text-fg">{value}</dd>
+      <dd className="font-display text-2xl text-heading">{value}</dd>
       <dd className="text-xs text-muted">{label}</dd>
-    </div>
-  );
-}
-
-function ScoreSample({ name, score, live }: { name: string; score: string; live?: boolean }) {
-  return (
-    <div className={`rounded-2xl border px-3 py-4 ${live ? "border-accent bg-deep" : "border-line bg-deep"}`}>
-      <div className="flex items-center justify-between text-xs text-muted">
-        <span className="font-semibold">{name}</span>
-        {live ? <span className="text-accent">LIVE</span> : <span>VENTER</span>}
-      </div>
-      <p className="mt-2 text-center font-display text-6xl text-primary">{score}</p>
     </div>
   );
 }

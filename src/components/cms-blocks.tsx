@@ -52,8 +52,8 @@ export function RichText({ text }: { text: string }) {
 
 const btn = "inline-flex min-h-12 items-center rounded-full bg-primary px-6 text-base font-semibold text-primary-fg transition hover:opacity-90";
 
-const eyebrowCls = "text-sm font-semibold uppercase tracking-[0.2em] text-primary";
-const titleCls = "font-display text-4xl text-fg sm:text-5xl";
+const eyebrowCls = "text-sm font-semibold uppercase tracking-[0.2em] text-accent";
+const titleCls = "font-display text-4xl text-heading sm:text-5xl";
 
 function Head({ eyebrow, heading, text }: { eyebrow?: string; heading: string; text?: string }) {
   return (
@@ -84,7 +84,7 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
           <div className={`mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:py-24 ${side ? "lg:grid-cols-[1.1fr_0.9fr]" : ""}`}>
             <div>
               {block.eyebrow ? <p className={eyebrowCls}>{block.eyebrow}</p> : null}
-              <h1 className="mt-4 max-w-xl font-display text-5xl text-fg sm:text-7xl">{block.heading}</h1>
+              <h1 className="mt-4 max-w-xl font-display text-5xl text-heading sm:text-7xl">{block.heading}</h1>
               {block.text ? <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">{block.text}</p> : null}
               {(block.ctaLabel && block.ctaHref) || block.accountButtons ? (
                 <div className="mt-9 flex min-h-12 flex-wrap gap-3">
@@ -101,7 +101,7 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
     case "text":
       return (
         <section className="mx-auto max-w-3xl px-5 py-12">
-          {block.heading ? <h2 className="mb-4 font-display text-4xl text-fg">{block.heading}</h2> : null}
+          {block.heading ? <h2 className="mb-4 font-display text-4xl text-heading">{block.heading}</h2> : null}
           <RichText text={block.body} />
         </section>
       );
@@ -119,8 +119,8 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {block.items.map((item, i) => (
               <article key={i} className="rounded-card border border-line bg-surface p-6">
-                <span aria-hidden="true" className="mb-4 block h-1 w-10 rounded-full bg-primary/70" />
-                <h3 className="font-display text-2xl text-fg">{item.title}</h3>
+                <span aria-hidden="true" className="mb-4 block h-1 w-10 rounded-full bg-accent/70" />
+                <h3 className="font-display text-2xl text-heading">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{item.text}</p>
               </article>
             ))}
@@ -134,8 +134,8 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
           <ol className="mt-10 grid gap-5 md:grid-cols-3">
             {block.items.map((item, i) => (
               <li key={i} className="rounded-card border border-line bg-surface p-6">
-                <span className="font-display text-4xl text-primary">{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="mt-2 font-display text-2xl text-fg">{item.title}</h3>
+                <span className="inline-grid min-w-12 place-items-center rounded-lg border border-primary px-2 py-1 font-display text-3xl text-primary">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-2 font-display text-2xl text-heading">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{item.text}</p>
               </li>
             ))}
@@ -155,7 +155,7 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {SPORT_GROUPS.map((group) => (
               <article key={group} className="rounded-card border border-line bg-surface p-6">
-                <h3 className="font-display text-2xl text-fg">{group}</h3>
+                <h3 className="font-display text-2xl text-heading">{group}</h3>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {SPORTS.filter((sp) => sp.group === group).map((sp) => (
                     <li key={sp.id}>
@@ -183,7 +183,7 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
             <ul className="grid content-start gap-4">
               {block.items.map((item, i) => (
                 <li key={i} className="rounded-card border border-line bg-surface p-5">
-                  {item.tag ? <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">{item.tag}</span> : null}
+                  {item.tag ? <span className="inline-flex rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">{item.tag}</span> : null}
                   <p className="mt-3 text-sm leading-relaxed text-muted">{item.text}</p>
                 </li>
               ))}
@@ -196,7 +196,7 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
         <section className="mx-auto max-w-6xl px-5 py-12">
           <div className="flex flex-col items-start gap-5 rounded-card border border-line bg-surface-2 p-8 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-display text-3xl text-fg">{block.heading}</h2>
+              <h2 className="font-display text-3xl text-heading">{block.heading}</h2>
               {block.text ? <p className="mt-2 max-w-xl text-muted">{block.text}</p> : null}
             </div>
             {block.label && block.href ? <SmartLink href={block.href} className={btn}>{block.label}</SmartLink> : null}
@@ -223,7 +223,7 @@ function CmsBlock({ block, extras, tinted }: { block: Block; extras: Extras; tin
 export function NotFoundPage() {
   return (
     <section className="mx-auto max-w-3xl px-5 py-24 text-center">
-      <h1 className="font-display text-5xl text-fg">Siden findes ikke</h1>
+      <h1 className="font-display text-5xl text-heading">Siden findes ikke</h1>
       <p className="mt-4 text-muted">Den er måske flyttet eller ikke udgivet endnu.</p>
       <Link to="/" className="mt-8 inline-flex min-h-12 items-center rounded-full bg-primary px-6 font-semibold text-primary-fg">Til forsiden</Link>
     </section>
