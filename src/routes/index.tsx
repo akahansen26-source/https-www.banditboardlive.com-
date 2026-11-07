@@ -97,7 +97,7 @@ function AccountButtons() {
 
 function Showcase() {
   return (
-    <div className="rounded-[1.5rem] border border-line bg-surface p-5 shadow-[0_30px_60px_-40px_rgba(31,38,34,0.45)]">
+    <div className="rounded-[1.5rem] border border-line bg-surface p-5 shadow-[0_30px_60px_-40px_rgba(31,42,55,0.35)]">
       <div className="theme-dark rounded-2xl p-4">
         <div className="grid grid-cols-2 gap-3">
           <ScoreSample name="Sanderum" score="47" live />
