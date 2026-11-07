@@ -1,0 +1,60 @@
+// Simulerer Stream Deck-appen: starter pluginnet, sender tryk og læser hvad pluginnet viser på tasterne.
+import { WebSocketServer } from "ws";
+import { spawn } from "node:child_process";
+const [token, server] = process.argv.slice(2);
+const port = 28000 + Math.floor(Math.random() * 1000);
+const wss = new WebSocketServer({ port });
+const log = [];
+let sock;
+const send = (o) => sock.send(JSON.stringify(o));
+const ACT_B = "com.banditboardlive.scoreboard.button", ACT_S = "com.banditboardlive.scoreboard.score";
+const dev = "dev1";
+const store = {};
+const appear = (action, context, settings, row) => (store[context] = { action, settings }, send({ event: "willAppear", action, context, device: dev, payload: { controller: "Keypad", coordinates: { column: row, row: 0 }, isInMultiAction: false, settings } }));
+const keyDown = (action, context, settings) => send({ event: "keyDown", action, context, device: dev, payload: { coordinates: { column: 0, row: 0 }, isInMultiAction: false, settings } });
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+wss.on("connection", (ws) => {
+  sock = ws;
+  ws.on("message", (m) => {
+    const d = JSON.parse(m);
+    if (d.event === "getGlobalSettings") send({ event: "didReceiveGlobalSettings", payload: { settings: { token, server } } });
+    if (d.event === "getSettings") { const x = store[d.context]; send({ event: "didReceiveSettings", action: x.action, context: d.context, device: dev, payload: { coordinates: { column: 0, row: 0 }, isInMultiAction: false, settings: x.settings } }); }
+    log.push(d);
+    if (d.event === "logMessage") return;
+    const short = d.event === "setImage" ? { event: d.event, context: d.context, svg: decodeURIComponent(String(d.payload.image).split(",")[1] || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() } : { event: d.event, context: d.context, payload: d.payload };
+    console.log("←", JSON.stringify(short).slice(0, 220));
+  });
+});
+const info = { application: { font: ".AppleSystemUIFont", language: "en", platform: "mac", platformVersion: "14.0", version: "6.7.0.21000" }, colors: {}, devicePixelRatio: 2, devices: [{ id: dev, name: "Stream Deck", size: { columns: 5, rows: 3 }, type: 0 }], plugin: { uuid: "com.banditboardlive.scoreboard", version: "1.0.0.0" } };
+const child = spawn(process.execPath, ["bin/plugin.js", "-port", String(port), "-pluginUUID", "PLUGINCTX", "-registerEvent", "registerPlugin", "-info", JSON.stringify(info)], { cwd: "com.banditboardlive.scoreboard.sdPlugin", stdio: ["ignore", "pipe", "pipe"] });
+child.stdout.on("data", (d) => console.log("PLUGIN OUT", String(d).slice(0, 300)));
+child.on("exit", (c) => console.log("PLUGIN EXIT", c));
+child.stderr.on("data", (d) => console.log("PLUGIN ERR", String(d).slice(0, 400)));
+for (let i = 0; i < 50 && !sock; i++) await wait(200);
+if (!sock) { console.log("plugin connected NOT"); }
+await wait(1500);
+console.log("== tasterne vises");
+appear(ACT_B, "kNext", { a: "__next", label: "Næste" }, 0);
+appear(ACT_B, "kKegle", { a: "add", v: "2", label: "Kegle +2" }, 1);
+appear(ACT_B, "kTom", {}, 2);
+appear(ACT_S, "kS0", { side: "0" }, 3);
+appear(ACT_S, "kS1", { side: "1" }, 4);
+appear(ACT_S, "kTur", { side: "turn" }, 5);
+await wait(4000);
+console.log("== tryk: Kegle +2 (Katrines tur)");
+keyDown(ACT_B, "kKegle", { a: "add", v: "2", label: "Kegle +2" });
+await wait(2500);
+console.log("== tryk: Næste");
+keyDown(ACT_B, "kNext", { a: "__next", label: "Næste" });
+await wait(3000);
+console.log("== tryk: tast uden valgt knap (skal give advarsel)");
+keyDown(ACT_B, "kTom", {});
+await wait(1500);
+console.log("== indstillingsvindue åbnes");
+send({ event: "propertyInspectorDidAppear", action: ACT_B, context: "kKegle", device: dev });
+send({ event: "sendToPlugin", action: ACT_B, context: "kKegle", payload: { event: "refresh" } });
+await wait(2500);
+const alerts = log.filter((d) => d.event === "showAlert").map((d) => d.context);
+const pi = log.filter((d) => d.event === "sendToPropertyInspector").pop();
+console.log("ALERTS:", alerts, "PI catalog:", pi?.payload?.catalog?.length, "online:", pi?.payload?.online);
+child.kill(); wss.close(); process.exit(0);

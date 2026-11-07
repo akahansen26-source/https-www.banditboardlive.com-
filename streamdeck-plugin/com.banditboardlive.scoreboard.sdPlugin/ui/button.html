@@ -1,0 +1,39 @@
+<!doctype html><html lang="da"><head><meta charset="utf-8"><link rel="stylesheet" href="pi.css"></head><body>
+<h3>Knap på scoreboardet</h3>
+<label for="pick">Hvad skal tasten trykke på?</label>
+<select id="pick"><option value="">Åbn scoreboardet for at se knapperne …</option></select>
+<p class="mut" id="pickhelp">Listen viser de knapper, scoreboardet har vist. Mangler en knap, så åbn den kamptype/det panel på scoreboardet én gang – så kommer den med.</p>
+<div class="check"><input id="okMark" type="checkbox"><label for="okMark" style="margin:0">Vis ✓ på tasten ved hvert tryk</label></div>
+<details><summary>Manuel kode (til eksperter)</summary>
+<label for="ma">Kode</label><input id="ma" placeholder="fx __next eller add">
+<label for="mv">Værdi</label><input id="mv" placeholder="fx 2">
+<label for="ml">Tekst på tasten</label><input id="ml">
+<button id="msave" type="button" style="margin-top:6px">Gem</button></details>
+<h3>Forbindelse</h3>
+<label for="token">Nøgle fra scoreboardet</label>
+<input id="token" type="password" placeholder="bbsd_…" autocomplete="off">
+<div class="status"><span id="conn" class="mut">Forbinder …</span></div>
+<div class="row" style="margin-top:6px"><button id="refresh" type="button">Opdatér</button></div>
+<p class="mut">Nøglen laver du på scoreboardet: tryk <b>🎛 Stream Deck</b> → <b>Lav nøgle</b> → <b>Kopiér</b>. Den gælder for alle taster.</p>
+<details><summary>Avanceret</summary><label for="server">Server</label><input id="server" type="url"></details>
+<script src="pi.js"></script>
+<script>
+const keyOf=(a,v)=>a+'|'+(v||'');
+function fill(){
+  const sel=document.getElementById('pick');const cat=(window.remote&&remote.catalog)||[];
+  const cur=settings.a?keyOf(settings.a,settings.v):'';
+  const groups={};cat.forEach(c=>{(groups[c.group]=groups[c.group]||[]).push(c)});
+  let h='<option value="">– vælg knap –</option>';
+  if(cur&&!cat.some(c=>keyOf(c.a,c.v)===cur))h+='<option value="'+esc(cur)+'" selected>'+esc(settings.label||settings.a)+' (gemt)</option>';
+  Object.keys(groups).forEach(g=>{h+='<optgroup label="'+esc(g)+'">'+groups[g].map(c=>'<option value="'+esc(keyOf(c.a,c.v))+'"'+(keyOf(c.a,c.v)===cur?' selected':'')+'>'+esc(c.label)+'</option>').join('')+'</optgroup>'});
+  sel.innerHTML=h;
+}
+window.onRemote=()=>fill();
+window.onSettings=(s)=>{document.getElementById('okMark').checked=!!s.okMark;document.getElementById('ma').value=s.a||'';document.getElementById('mv').value=s.v||'';document.getElementById('ml').value=s.label||'';fill()};
+document.getElementById('pick').addEventListener('change',e=>{
+  const val=e.target.value;if(!val)return;const [a,v]=[val.slice(0,val.indexOf('|')),val.slice(val.indexOf('|')+1)];
+  const c=((window.remote&&remote.catalog)||[]).find(x=>x.a===a&&(x.v||'')===v);
+  settings.a=a;settings.v=v;settings.label=c?c.label:(settings.label||a);saveSettings();window.onSettings(settings)});
+document.getElementById('okMark').addEventListener('change',e=>{settings.okMark=e.target.checked;saveSettings()});
+document.getElementById('msave').addEventListener('click',()=>{settings.a=document.getElementById('ma').value.trim();settings.v=document.getElementById('mv').value.trim();settings.label=document.getElementById('ml').value.trim()||settings.a;saveSettings();fill()});
+</script></body></html>

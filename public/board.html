@@ -1233,6 +1233,7 @@ ${tmMini()}<button class="btn sm" data-act="vismod" title="Vælg hvad der vises 
 <button class="btn sm" data-act="reserve">Reserver${S.reserve.length?` <b class="badge">${S.reserve.length}</b>`:''}</button>
 <button class="btn sm" data-act="win" data-v="tv">Storskærm-vindue</button>
 <button class="btn sm" data-act="win" data-v="overlay">Broadcast (OBS)</button>
+<button class="btn sm" data-act="sdeck" title="Styr scoreboardet fra Stream Deck">🎛 Stream Deck</button>
 <button class="btn sm" data-act="sync">Tving sync</button>
 ${g.over?'':`<button class="btn sm ${g.paused?'pri':''}" data-act="rpause">${g.paused?'▶ Fortsæt':'⏸ Pause'}</button>`}<button class="btn sm ghost danger" data-act="end">Afslut</button></div>${g.paused?'<div class="resv" style="margin-bottom:12px">⏸ Kampen er sat på pause – pointindtastning er låst.</div>':''}`}
 
@@ -2619,7 +2620,7 @@ function tourCard(){const st=S.settings;return `<section class="card"><h2>Turner
 ${tourFiles?`<div class="tfiles">${tourFiles.map(f=>`<div><b>${esc(f.name||f.file)}</b><small>${f.savedAt?new Date(f.savedAt).toLocaleString('da-DK'):''}${f.players!=null?' · '+f.players+' spillere · '+f.teams+' hold · kamp: '+esc(f.game||''):''}</small><button class="btn sm" data-act="tload" data-v="${esc(f.file)}">Åbn</button><button class="btn sm ghost danger" data-act="tdel" data-v="${esc(f.file)}">Slet</button></div>`).join('')||'<p class="mut">Ingen gemte turneringer endnu.</p>'}</div>`:''}</section>`}
 
 /* ---------- events ---------- */
-function act(a,v,el){const g=S.game;if(g&&g.paused&&!g.over&&PAUSE_BLOCK.has(a))return toast('⏸ Kampen er sat på pause – tryk ▶ Fortsæt');if(a==='tab'&&menuOpen)setMenu(false);if((ADMIN_ACTS.has(a)||(a==='tab'&&(v==='settings'||v==='media')))&&!isAdmin()){askPin();return}switch(a){
+function act(a,v,el){if(a==='sdeck'){if(!isAdmin()){askPin();return}sdNewTok='';sdModal();return}if(a==='sdnew'){sdNewToken();return}if(a==='sdoff'){sdRevoke();return}if(a==='sdcopy'){sdCopy();return}const g=S.game;if(g&&g.paused&&!g.over&&PAUSE_BLOCK.has(a))return toast('⏸ Kampen er sat på pause – tryk ▶ Fortsæt');if(a==='tab'&&menuOpen)setMenu(false);if((ADMIN_ACTS.has(a)||(a==='tab'&&(v==='settings'||v==='media')))&&!isAdmin()){askPin();return}switch(a){
 case 'menu':setMenu(!menuOpen,menuOpen?'btn':'item');break;
 case 'tab':menuOpen=false;tab=v;render();scrollTo(0,0);break;
 case 'pick':{setup.teams=[];const i=setup.sel.indexOf(v);if(i>=0)setup.sel.splice(i,1);else if(setup.sel.length<20)setup.sel.push(v);render();break}
@@ -2919,6 +2920,78 @@ else if(k==='Backspace'&&g.kpad==='num'){act('bk')}
 else if(k==='+'){act('plus')}});
 if(MODE==='tv')document.addEventListener('dblclick',()=>document.documentElement.requestFullscreen?.());
 
+/* ---------- Stream Deck / fjernbetjening ----------
+   Stream Deck-pluginnet sender et knaptryk til serveren. Det åbne scoreboard henter trykket og klikker
+   på præcis samme knap, som hvis man trykkede selv – så alle regler, pause, PIN osv. gælder uændret. */
+const SD_SKIP=new Set(['sdeck','sdnew','sdoff','sdcopy','menu','tab','win','sync','arrange','arrangeReset','vismod','hidemod','close','edit','editsave','qrme','qrtv','rqr','tmqr','bqr','csv','acsv','hpdf','hxlsx','delp','delt','hdel','mdel','tdel','bdel','sponrm','reset','hreset','import','impdo','impreset','imptpl','demo','rlogin','pinok','limok']);
+const SD_CATKEY='bb.sdcat';
+let sdOn=false,sdLoopRunning=false,sdDone=[],sdLastStatus='',sdLastCat='',sdStatusT=null,sdInfo=null,sdNewTok='';
+const sdSleep=ms=>new Promise(r=>setTimeout(r,ms));
+function sdGroup(b){if(b.closest('.pad'))return 'Taster';if(b.closest('.turnpanel'))return 'Tur og spillere';if(b.closest('.gbar'))return 'Kampbjælke';if(b.closest('.tbar,.tables,.tchip')||b.classList.contains('tchip'))return 'Borde';if(b.closest('.winner'))return 'Efter kampen';if(b.closest('.hist'))return 'Historik';return 'Andet'}
+function sdLabel(b){let t=(b.getAttribute('aria-label')||b.innerText||b.textContent||b.title||'').replace(/\s+/g,' ').trim();if(!t&&b.dataset.v)t=b.dataset.act+' '+b.dataset.v;return t.slice(0,48)}
+function sdAllowed(a){return !SD_SKIP.has(a)&&!ADMIN_ACTS.has(a)}
+function sdButtons(){return [...document.querySelectorAll('[data-act]')].filter(b=>!b.closest('#modal')&&!b.closest('.bbmenu'))}
+function sdCatalog(){
+  let saved=[];try{saved=JSON.parse(localStorage.getItem(SD_CATKEY)||'[]')}catch(e){}
+  const map=new Map(saved.filter(x=>x&&x.a).map(x=>[x.a+'|'+(x.v||''),x]));
+  sdButtons().forEach(b=>{const a=b.dataset.act,v=b.dataset.v||'';if(!sdAllowed(a))return;const label=sdLabel(b);if(!label)return;map.set(a+'|'+v,{a,v,label,group:sdGroup(b),mode:S.game?S.game.mode:''})});
+  const list=[{a:'__next',v:'',label:'Næste / Serie slut (mellemrum)',group:'Genveje'},{a:'__undo',v:'',label:'Fortryd (Esc)',group:'Genveje'},...[...map.values()].filter(x=>x.a!=='__next'&&x.a!=='__undo')].slice(0,300);
+  try{localStorage.setItem(SD_CATKEY,JSON.stringify(list.filter(x=>!x.a.startsWith('__'))))}catch(e){}
+  return list}
+function sdStatus(){
+  const g=S&&S.game;const t=(()=>{try{return tableName()}catch(e){return ''}})();
+  if(!g)return {table:t,game:false};
+  return {table:t,game:true,mode:g.mode||'',over:!!g.over,paused:!!g.paused,turn:g.turn??0,round:g.round||1,target:g.target||null,
+    active:(g.active&&g.active.playerName)||'',sides:(g.sides||[]).map(x=>({name:(()=>{try{return sideName(x)}catch(e){return ''}})(),score:x.score??0,on:!g.over&&g.sides[g.turn]===x}))}}
+function sdRun(c){
+  const a=String(c.act||''),v=String(c.v||'');
+  if(!$('#modal').hidden)return {ok:false,message:'Et vindue er åbent på scoreboardet – luk det først.'};
+  if(a==='__next'){if(!S.game||tab!=='game')return {ok:false,message:'Ingen kamp i gang.'};if(S.game.paused&&!S.game.over)return {ok:false,message:'Kampen er på pause.'};commit();return {ok:true,message:'Næste'}}
+  if(a==='__undo'){if(!S.game)return {ok:false,message:'Ingen kamp i gang.'};S.game.mode==='point'?undoPoint(S.game):doUndo();return {ok:true,message:'Fortryd'}}
+  if(!sdAllowed(a))return {ok:false,message:'Den knap kan ikke styres fra Stream Deck.'};
+  const b=sdButtons().find(x=>x.dataset.act===a&&(x.dataset.v||'')===v);
+  if(!b)return {ok:false,message:'Knappen findes ikke på scoreboardet lige nu.'};
+  if(b.disabled)return {ok:false,message:'Knappen er slået fra lige nu.'};
+  b.click();return {ok:true,message:sdLabel(b)}}
+function sdBody(extra){const st=JSON.stringify(sdStatus());const cat=JSON.stringify(sdCatalog());const body=Object.assign({},extra);
+  if(st!==sdLastStatus){body.status=JSON.parse(st);sdLastStatus=st}
+  if(cat!==sdLastCat){body.catalog=JSON.parse(cat);sdLastCat=cat}
+  return body}
+async function sdLoop(){
+  if(sdLoopRunning)return;sdLoopRunning=true;let fails=0;
+  try{while(sdOn){
+    const done=sdDone.splice(0);
+    let r;
+    try{r=await fetch('/api/board/streamdeck',{method:'POST',headers:bbHeaders(),credentials:'include',cache:'no-store',body:JSON.stringify(sdBody({done,wait:done.length?0:8000}))})}
+    catch(e){sdDone.unshift(...done);fails++;await sdSleep(Math.min(15000,1000*fails));continue}
+    if(r.status===401||r.status===403){sdOn=false;break}
+    if(!r.ok){sdDone.unshift(...done);fails++;await sdSleep(Math.min(15000,1000*fails));continue}
+    fails=0;
+    const j=await r.json().catch(()=>({}));
+    for(const c of (j.commands||[])){let res;try{res=sdRun(c)}catch(e){res={ok:false,message:'Fejl: '+(e&&e.message||e)}}sdDone.push(Object.assign({id:c.id},res));if(!res.ok)toast('🎛 '+res.message)}
+  }}finally{sdLoopRunning=false}}
+/* status (score, tur) sendes med det samme, når den ændrer sig – så tasterne på Stream Deck følger med */
+function sdWatch(){clearInterval(sdStatusT);sdStatusT=setInterval(()=>{if(!sdOn)return;const st=JSON.stringify(sdStatus());if(st===sdLastStatus)return;
+  fetch('/api/board/streamdeck',{method:'POST',headers:bbHeaders(),credentials:'include',body:JSON.stringify(sdBody({wait:0,peek:true}))}).catch(()=>{sdLastStatus=''})},700)}
+function sdStart(){if(MODE||sdOn)return;sdOn=true;sdLoop();sdWatch()}
+async function sdBoot(){if(MODE)return;try{const r=await fetch('/api/board/streamdeck',{headers:bbHeaders(),credentials:'include',cache:'no-store'});if(!r.ok)return;sdInfo=await r.json();if(sdInfo.hasToken)sdStart()}catch(e){}}
+function sdModal(){
+  const i=sdInfo||{};const origin=location.origin;
+  openModal(`<h2>🎛 Stream Deck</h2>
+<p class="mut">Styr knapperne på scoreboardet fra dit Elgato Stream Deck – også mens OBS eller Streamlabs er i fokus. Tryk på en tast = præcis som at klikke på knappen her.</p>
+<ol style="margin:12px 0 12px 18px;line-height:1.7">
+<li>Hent og dobbeltklik på pluginnet: <a href="/downloads/BanditBoardLive.streamDeckPlugin" download style="color:var(--pri,#00D4FF);font-weight:700">BanditBoardLive.streamDeckPlugin</a></li>
+<li>Lav en nøgle herunder og kopiér den.</li>
+<li>I Stream Deck: træk <b>Scoreboard-knap</b> ind på en tast, indsæt nøglen, og vælg hvilken knap den skal trykke på.</li>
+<li>Hold dette scoreboard åbent (fx i et faneblad på streaming-pc'en) – det er det, der udfører trykkene.</li></ol>
+${sdNewTok?`<label class="mut" style="display:block;margin-top:6px">Din nøgle (vises kun nu – gem den i pluginnet):</label><div style="display:flex;gap:8px;margin:6px 0"><input id="sdtok" readonly value="${esc(sdNewTok)}" style="flex:1;min-width:0;font-family:monospace"><button class="btn pri" data-act="sdcopy">Kopiér</button></div>`
+ :i.hasToken?`<p>Der er en aktiv nøgle (slutter på <b>…${esc(i.hint||'')}</b>).${sdOn?' Scoreboardet lytter efter Stream Deck-tryk.':''}</p>`:'<p>Der er ingen nøgle endnu.</p>'}
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn pri" data-act="sdnew">${i.hasToken?'Lav ny nøgle (den gamle stopper)':'Lav nøgle'}</button>${i.hasToken?'<button class="btn ghost danger" data-act="sdoff">Slå Stream Deck fra</button>':''}<button class="btn" data-act="close">Luk</button></div>
+<details style="margin-top:14px"><summary class="mut">Andre programmer (Bitfocus Companion, Streamer.bot, Touch Portal)</summary><p class="mut" style="margin-top:6px">De kan sende et tryk med en web-adresse:<br><code style="word-break:break-all">${esc(origin)}/api/streamdeck?token=DIN_NØGLE&amp;a=__next</code><br>Erstat <code>__next</code> med knappens kode – listen over knapper og koder ses i Stream Deck-pluginnet.</p></details>`)}
+async function sdNewToken(){try{const r=await fetch('/api/board/streamdeck',{method:'POST',headers:bbHeaders(),credentials:'include',body:JSON.stringify({newToken:true})});const j=await r.json();if(!r.ok)throw new Error(j.error||'Kunne ikke lave nøgle');sdNewTok=j.token;sdInfo={hasToken:true,hint:j.hint};sdLastCat='';sdLastStatus='';sdStart();sdModal()}catch(e){toast(e.message)}}
+async function sdRevoke(){try{await fetch('/api/board/streamdeck',{method:'POST',headers:bbHeaders(),credentials:'include',body:JSON.stringify({revoke:true})});sdOn=false;sdNewTok='';sdInfo={hasToken:false};sdModal();toast('Stream Deck er slået fra')}catch(e){toast('Kunne ikke slå fra')}}
+function sdCopy(){const el=$('#sdtok');if(!el)return;el.select();(navigator.clipboard?navigator.clipboard.writeText(el.value):Promise.reject()).then(()=>toast('Nøglen er kopieret')).catch(()=>{document.execCommand&&document.execCommand('copy');toast('Nøglen er kopieret')})}
+
 /* ---------- konto-synk & boot ---------- */
 let mediaReadonly=false, cloudQuiet=false, cloudRev='', cloudTimer=null;
 function bbHeaders(){
@@ -3096,6 +3169,7 @@ async function startApp(){
   if(MODE.startsWith('overlay'))setInterval(()=>{if(M().sponsors.length>6){ovPage++;render()}},8000);
   if(!remote&&has(S)) scheduleCloud();
   clearInterval(cloudTimer); cloudTimer=setInterval(pullCloud,3000);
+  sdBoot();
   if(!MODE&&S.game&&!S.game.over)toast('Uafsluttet kamp gendannet');
 }
 addEventListener('hashchange',()=>location.reload());

@@ -1,0 +1,13 @@
+{
+  "name": "banditboard-live-streamdeck",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Stream Deck-plugin til BanditBoard Live-scoreboardet",
+  "type": "module",
+  "scripts": {
+    "build": "sh build.sh",
+    "pack": "sh build.sh && streamdeck pack com.banditboardlive.scoreboard.sdPlugin -o dist -f && cp dist/com.banditboardlive.scoreboard.streamDeckPlugin ../public/downloads/BanditBoardLive.streamDeckPlugin"
+  },
+  "dependencies": { "@elgato/streamdeck": "^1.4.1" },
+  "devDependencies": { "@elgato/cli": "^1.10.4", "esbuild": "^0.28.2", "typescript": "^5", "ws": "^8" }
+}
