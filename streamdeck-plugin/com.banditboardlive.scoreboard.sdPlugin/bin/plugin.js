@@ -3736,6 +3736,122 @@ var require_websocket_server = __commonJS({
   }
 });
 
+// src/icons.ts
+var escXml = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]);
+var fit = (text, max) => text.length > max ? text.slice(0, max - 1) + "\u2026" : text;
+var C = {
+  score: ["#FF7A1A", "#C2410C"],
+  minus: ["#EF4444", "#991B1B"],
+  turn: ["#22D3EE", "#0E7490"],
+  num: ["#334155", "#0F172A"],
+  enter: ["#22C55E", "#15803D"],
+  game: ["#8B5CF6", "#5B21B6"],
+  danger: ["#64748B", "#1E293B"],
+  view: ["#3B82F6", "#1D4ED8"]
+};
+function lookFor(a, vRaw, label) {
+  const v = vRaw.split("#")[0];
+  const L = label.replace(/^[^\p{L}\p{N}+−-]+/u, "").trim();
+  const num = L.match(/^(.*?)\s*([+−-]\s?\d+)$/);
+  switch (a) {
+    case "__next":
+    case "next":
+      return { big: "\xBB", cap: a === "next" ? "SERIE SLUT" : "N\xC6STE", bg: C.enter, bigSize: 80 };
+    case "__undo":
+    case "undo":
+    case "pundo":
+      return { big: "\u21B6", cap: a === "undo" ? "FORTRYD SLAG" : "FORTRYD", bg: C.danger, bigSize: 70 };
+    case "__skt":
+      return { big: v || "1", cap: "MINUS TIL SPILLER", bg: C.minus, bigSize: 60 };
+    case "dig":
+      return { big: v, cap: "", bg: C.num, bigSize: 84 };
+    case "bk":
+      return { big: "\u232B", cap: "SLET", bg: C.num, bigSize: 56 };
+    case "plus":
+      return { big: "+", cap: "L\xC6G TIL", bg: C.num, bigSize: 84 };
+    case "sign":
+      return { big: "\u2212", cap: "MINUS", bg: C.minus, bigSize: 84 };
+    case "kent":
+      return { big: "\u21B5", cap: "ENTER", bg: C.enter, bigSize: 70 };
+    case "sk":
+      return { big: "\u2212" + v, cap: "MINUSPOINT", bg: C.minus, bigSize: v.length > 1 ? 56 : 66 };
+    case "sktgt":
+      return { big: fit(L, 8), cap: "MINUS TIL", bg: C.minus, bigSize: L.length > 6 ? 28 : 34 };
+    case "foul":
+      return v === "2" ? { big: "+2", cap: "R\xD8D I HUL", bg: C.minus, bigSize: 60 } : v === "6" ? { big: "+6", cap: "FEJL 6", bg: C.minus, bigSize: 60 } : { big: "!", cap: "FEJL", bg: C.minus, bigSize: 70 };
+    case "tstart":
+      return { big: "\u25B6", cap: "START TUR", bg: C.turn, bigSize: 60 };
+    case "tprev":
+      return { big: "\u25C0", cap: "FORRIGE", bg: C.turn, bigSize: 56 };
+    case "tnextp":
+      return { big: "\u25B6|", cap: "N\xC6STE SPILLER", bg: C.turn, bigSize: 50 };
+    case "tnextt":
+      return { big: "\u25B6\u25B6", cap: "N\xC6STE TUR", bg: C.turn, bigSize: 50 };
+    case "rpause":
+      return { big: "II", cap: "PAUSE", bg: C.game, bigSize: 60 };
+    case "tmstart":
+    case "tmpause":
+      return { big: "\u25F7", cap: "TIMER", bg: C.game, bigSize: 64 };
+    case "tmreset":
+      return { big: "\u21BA", cap: "NULSTIL TIMER", bg: C.game, bigSize: 60 };
+    case "breset":
+      return { big: "\u21BA", cap: "NULSTIL TAVLE", bg: C.danger, bigSize: 60 };
+    case "end":
+      return { big: "\u25A0", cap: "AFSLUT KAMP", bg: C.danger, bigSize: 52 };
+    case "rematch":
+      return { big: "\u21BB", cap: "OMKAMP", bg: C.game, bigSize: 60 };
+    case "reserve":
+      return { big: "\u2630", cap: "RESERVER", bg: C.game, bigSize: 52 };
+    case "view":
+      return { big: "\u25A3", cap: fit(L.toUpperCase(), 11), bg: C.view, bigSize: 56 };
+    case "bsel": {
+      const m = L.match(/Bord\s*\d+/i);
+      return { big: m ? m[0].replace(/\D+/g, "") : "#", cap: "BORD", bg: C.view, bigSize: 64 };
+    }
+    case "lock":
+      return { big: "\u{1F512}", cap: fit(L.toUpperCase(), 12), bg: C.game, bigSize: 44 };
+  }
+  if (a === "add" || num) {
+    const n = num ? num[2].replace(/\s/g, "").replace("-", "\u2212") : "+" + v;
+    const cap = (num ? num[1] : L).toUpperCase();
+    return { big: n, cap: fit(cap, 13), bg: n.startsWith("\u2212") ? C.minus : C.score, bigSize: n.length > 3 ? 50 : 62 };
+  }
+  return { big: "", cap: L.toUpperCase(), bg: C.game };
+}
+function capLines(cap) {
+  const words = cap.split(/\s+/).filter(Boolean);
+  const out = [];
+  for (const w of words) {
+    const l = out[out.length - 1];
+    if (l && (l + " " + w).length <= 11) out[out.length - 1] = l + " " + w;
+    else out.push(w);
+  }
+  return out.slice(0, 3);
+}
+function buttonImage(a, v, label) {
+  const k = lookFor(a, v, label);
+  const fg = k.fg ?? "#FFFFFF";
+  const grad = `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${k.bg[0]}"/><stop offset="1" stop-color="${k.bg[1]}"/></linearGradient></defs>`;
+  const caps = capLines(k.cap);
+  let body = "";
+  if (k.big) {
+    const bs = k.bigSize ?? 60;
+    const big = caps.length > 1 ? Math.min(bs, 50) : bs;
+    const by = caps.length > 1 ? 58 + big * 0.32 : caps.length ? 70 + big * 0.32 : 72 + big * 0.35;
+    body += `<text x="72" y="${by}" font-family="Arial Black, Arial, sans-serif" font-size="${big}" font-weight="900" fill="${fg}" text-anchor="middle">${escXml(k.big)}</text>`;
+    caps.forEach((c, i) => {
+      body += `<text x="72" y="${122 + i * 16 - (caps.length - 1) * 16}" font-family="Arial, sans-serif" font-size="${caps.length > 1 || c.length > 10 ? 15 : 17}" font-weight="700" fill="${fg}" fill-opacity=".92" text-anchor="middle">${escXml(c)}</text>`;
+    });
+  } else {
+    const start = 72 - (caps.length - 1) * 13 + 8;
+    caps.forEach((c, i) => {
+      body += `<text x="72" y="${start + i * 26}" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="${fg}" text-anchor="middle">${escXml(c)}</text>`;
+    });
+  }
+  const s = `<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">${grad}<rect width="144" height="144" rx="20" fill="url(#g)"/><rect x="3" y="3" width="138" height="138" rx="18" fill="none" stroke="#FFFFFF" stroke-opacity=".18" stroke-width="3"/>${body}</svg>`;
+  return "data:image/svg+xml;charset=utf8," + encodeURIComponent(s);
+}
+
 // node_modules/@elgato/streamdeck/node_modules/@elgato/schemas/dist/streamdeck/plugins/index.mjs
 var DeviceType;
 (function(DeviceType2) {
@@ -6435,8 +6551,8 @@ async function api(path2, init = {}, timeoutMs = 12e3) {
     clearTimeout(t);
   }
 }
-var escXml = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]);
-function fit(text, max) {
+var escXml2 = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]);
+function fit2(text, max) {
   return text.length > max ? text.slice(0, max - 1) + "\u2026" : text;
 }
 function svg(body, border = "#1E293B") {
@@ -6447,26 +6563,41 @@ function scoreImage(st, sideKey, online) {
   if (!online) return svg(`<text x="72" y="64" font-family="Arial" font-size="20" font-weight="700" fill="#94A3B8" text-anchor="middle">Scoreboard</text><text x="72" y="92" font-family="Arial" font-size="20" font-weight="700" fill="#94A3B8" text-anchor="middle">ikke \xE5bent</text>`);
   if (!st?.game || !st.sides?.length) return svg(`<text x="72" y="80" font-family="Arial" font-size="22" font-weight="700" fill="#94A3B8" text-anchor="middle">Ingen kamp</text>`);
   if (sideKey === "turn") {
-    const name = fit(st.active || st.sides.find((x) => x.on)?.name || "\u2013", 12);
-    return svg(`<text x="72" y="40" font-family="Arial" font-size="18" font-weight="700" fill="#22D3EE" text-anchor="middle">${st.over ? "SLUT" : st.paused ? "PAUSE" : "DIN TUR"}</text><text x="72" y="84" font-family="Arial" font-size="${name.length > 9 ? 20 : 26}" font-weight="800" fill="#F8FAFC" text-anchor="middle">${escXml(name)}</text><text x="72" y="120" font-family="Arial" font-size="18" fill="#94A3B8" text-anchor="middle">Runde ${st.round ?? 1}</text>`, "#22D3EE");
+    const name = fit2(st.active || st.sides.find((x) => x.on)?.name || "\u2013", 12);
+    return svg(`<text x="72" y="40" font-family="Arial" font-size="18" font-weight="700" fill="#22D3EE" text-anchor="middle">${st.over ? "SLUT" : st.paused ? "PAUSE" : "DIN TUR"}</text><text x="72" y="84" font-family="Arial" font-size="${name.length > 9 ? 20 : 26}" font-weight="800" fill="#F8FAFC" text-anchor="middle">${escXml2(name)}</text><text x="72" y="120" font-family="Arial" font-size="18" fill="#94A3B8" text-anchor="middle">Runde ${st.round ?? 1}</text>`, "#22D3EE");
   }
   const side = sideKey === "active" ? st.sides.find((x) => x.on) ?? st.sides[0] : st.sides[Number(sideKey) || 0];
   if (!side) return svg(`<text x="72" y="80" font-family="Arial" font-size="20" fill="#94A3B8" text-anchor="middle">Ingen spiller ${Number(sideKey) + 1}</text>`);
   const score = String(side.score ?? 0);
   const size = score.length <= 2 ? 72 : score.length === 3 ? 58 : 44;
   return svg(
-    `<text x="72" y="34" font-family="Arial" font-size="20" font-weight="700" fill="${side.on ? "#22D3EE" : "#CBD5E1"}" text-anchor="middle">${escXml(fit(side.name || "\u2013", 11))}</text><text x="72" y="${92 + size / 4}" font-family="Arial Black, Arial" font-size="${size}" font-weight="900" fill="#F8FAFC" text-anchor="middle">${escXml(score)}</text>`,
+    `<text x="72" y="34" font-family="Arial" font-size="20" font-weight="700" fill="${side.on ? "#22D3EE" : "#CBD5E1"}" text-anchor="middle">${escXml2(fit2(side.name || "\u2013", 11))}</text><text x="72" y="${92 + size / 4}" font-family="Arial Black, Arial" font-size="${size}" font-weight="900" fill="#F8FAFC" text-anchor="middle">${escXml2(score)}</text>`,
     side.on && !st.over ? "#22D3EE" : "#1E293B"
   );
+}
+var emptyButton = () => "data:image/svg+xml;charset=utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" rx="20" fill="#0B1222"/><rect x="4" y="4" width="136" height="136" rx="16" fill="none" stroke="#FF5B1F" stroke-width="4" stroke-dasharray="10 8"/><text x="72" y="68" font-family="Arial" font-size="20" font-weight="700" fill="#CBD5E1" text-anchor="middle">V\xE6lg</text><text x="72" y="94" font-family="Arial" font-size="20" font-weight="700" fill="#CBD5E1" text-anchor="middle">knap</text></svg>`);
+async function paintButton(action, s) {
+  if (!s.a) {
+    await action.setImage(emptyButton());
+    await action.setTitle("");
+    return;
+  }
+  if (s.plainTitle) {
+    await action.setImage(void 0);
+    await action.setTitle(wrap(s.label || s.a));
+    return;
+  }
+  await action.setImage(buttonImage(s.a, s.v ?? "", s.label || s.a));
+  await action.setTitle("");
 }
 var ButtonAction = class extends SingletonAction {
   manifestId = "com.banditboardlive.scoreboard.button";
   busy = /* @__PURE__ */ new Set();
   async onWillAppear(ev) {
-    if (ev.action.isKey()) await ev.action.setTitle(ev.payload.settings.label ? wrap(ev.payload.settings.label) : "V\xE6lg\nknap");
+    if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
   }
   async onDidReceiveSettings(ev) {
-    if (ev.action.isKey()) await ev.action.setTitle(ev.payload.settings.label ? wrap(ev.payload.settings.label) : "V\xE6lg\nknap");
+    if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
   }
   async onKeyDown(ev) {
     const { a, v = "", okMark } = ev.payload.settings;

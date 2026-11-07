@@ -1,3 +1,4 @@
+import { buttonImage } from "./icons";
 import streamDeck, { SingletonAction, type KeyDownEvent, type WillAppearEvent, type DidReceiveSettingsEvent, type SendToPluginEvent, type JsonValue, type KeyAction } from "@elgato/streamdeck";
 
 /**
@@ -7,7 +8,7 @@ import streamDeck, { SingletonAction, type KeyDownEvent, type WillAppearEvent, t
  */
 
 type Globals = { server?: string; token?: string };
-type ButtonSettings = { a?: string; v?: string; label?: string; confirm?: boolean; okMark?: boolean };
+type ButtonSettings = { a?: string; v?: string; label?: string; confirm?: boolean; okMark?: boolean; plainTitle?: boolean };
 type ScoreSettings = { side?: string; press?: string };
 type Side = { name: string; score: number | string; on: boolean };
 type Status = { table?: string; game?: boolean; mode?: string; over?: boolean; paused?: boolean; active?: string; round?: number; target?: number | null; sides?: Side[] };
@@ -68,16 +69,35 @@ function scoreImage(st: Status | undefined, sideKey: string, online: boolean) {
   );
 }
 
+
+const emptyButton = () =>
+  "data:image/svg+xml;charset=utf8," +
+  encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" rx="20" fill="#0B1222"/><rect x="4" y="4" width="136" height="136" rx="16" fill="none" stroke="#FF5B1F" stroke-width="4" stroke-dasharray="10 8"/><text x="72" y="68" font-family="Arial" font-size="20" font-weight="700" fill="#CBD5E1" text-anchor="middle">Vælg</text><text x="72" y="94" font-family="Arial" font-size="20" font-weight="700" fill="#CBD5E1" text-anchor="middle">knap</text></svg>`);
+async function paintButton(action: { setImage: (i?: string) => Promise<void>; setTitle: (t?: string) => Promise<void> }, s: ButtonSettings) {
+  if (!s.a) {
+    await action.setImage(emptyButton());
+    await action.setTitle("");
+    return;
+  }
+  if (s.plainTitle) {
+    await action.setImage(undefined);
+    await action.setTitle(wrap(s.label || s.a));
+    return;
+  }
+  await action.setImage(buttonImage(s.a, s.v ?? "", s.label || s.a));
+  await action.setTitle("");
+}
+
 /* ---------- Scoreboard-knap ---------- */
 class ButtonAction extends SingletonAction<ButtonSettings> {
   override readonly manifestId = "com.banditboardlive.scoreboard.button";
   private busy = new Set<string>();
 
   override async onWillAppear(ev: WillAppearEvent<ButtonSettings>) {
-    if (ev.action.isKey()) await ev.action.setTitle(ev.payload.settings.label ? wrap(ev.payload.settings.label) : "Vælg\nknap");
+    if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
   }
   override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<ButtonSettings>) {
-    if (ev.action.isKey()) await ev.action.setTitle(ev.payload.settings.label ? wrap(ev.payload.settings.label) : "Vælg\nknap");
+    if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
   }
   override async onKeyDown(ev: KeyDownEvent<ButtonSettings>) {
     const { a, v = "", okMark } = ev.payload.settings;
