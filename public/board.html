@@ -57,6 +57,18 @@ h1{font-size:40px}h2{font-size:26px}h3{font-size:19px}
 .nav{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:0;border-radius:10px;background:none;color:var(--muted);font-weight:600}
 .nav.on{color:var(--text);background:var(--panel2)}
 .nav.on svg{color:var(--a1)}
+.bbmenu{position:relative;margin-left:auto;flex:none}
+.menubtn{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font:700 15px var(--body);cursor:pointer}
+.menubtn:hover,.menubtn[aria-expanded="true"]{border-color:var(--a1)}
+.menubtn:focus-visible,.menulist .nav:focus-visible{outline:2px solid var(--a2);outline-offset:2px}
+.menucur{color:var(--muted);font-weight:600;max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menucur:before{content:'· '}
+.top .menulist{position:absolute;right:0;top:calc(100% + 8px);z-index:40;display:block;margin:0;width:min(280px,calc(100vw - 16px));max-height:calc(100vh - 96px);max-height:calc(100dvh - 96px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 18px 40px -12px rgba(0,0,0,.6)}
+.top .menulist[hidden]{display:none}
+.menulist ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.menulist .nav{width:100%;justify-content:flex-start;gap:12px;font-size:16px;text-align:left}
+.menulist .nav.on{box-shadow:inset 3px 0 0 var(--a1)}
+@media (max-width:520px){.menucur{display:none}.menubtn{padding:0 12px}}
 .venue{font:700 16px var(--disp);color:var(--muted);padding-left:6px}
 @media (max-width:980px){.nav span{display:none}.venue{display:none}}
 
@@ -1050,7 +1062,7 @@ function coreOf(){const c=Object.assign({},S);delete c.audit;c.players=S.players
 function pushImg(id,data){if(sock&&sock.connected)sock.emit('img',{id,data})}
 function logA(action,obj,user){const e={id:uid()+uid(),at:Date.now(),user:user||S.settings.operator||'Ukendt',action,obj:obj||''};S.audit.push(e);if(sock&&sock.connected)sock.emit('audit',e)}
 
-let tab='game',ptab='p',pq='',hf='all',editing=null,pendingYes=null,pendingNo=null,undo=[],prev={},arranging=false;
+let menuOpen=false,tab='game',ptab='p',pq='',hf='all',editing=null,pendingYes=null,pendingNo=null,undo=[],prev={},arranging=false;
 if({game:1,players:1,tour:1,matrix:1,rank:1,history:1,media:1,settings:1}[MODE]){tab=MODE;MODE=''}
 let setup={sel:[],pairs:false,mode:'skomager',start:60,dir:'down',target:300,pind:true,elim:false,teams:[]};
 if(S.lastSetup)setup=Object.assign({},setup,S.lastSetup,{sel:[],teams:[]});
@@ -1086,8 +1098,11 @@ function applyTheme(){const d=document.documentElement.dataset,st=S.settings;d.s
 
 /* ---------- views ---------- */
 function header(){const tabs=[['game','Spil'],['players','Kartotek'],['tour','Turneringer'],['matrix','Oversigt'],['rank','Rangliste'],['history','Historik'],['media','Medier'],['settings','Indstillinger']];
-return `<header class="top"><div class="brand"><a href="/konto" class="brandhome" title="Til kontoen">${brandMark('hdr')}</a>${clubLogo()?`<img class="clublogo" src="${clubLogo()}" alt="Klublogo">`:''}</div><nav>${tabs.map(([k,l])=>`<button class="nav ${tab===k?'on':''}" data-act="tab" data-v="${k}" aria-label="${l}">${ic(k)}<span>${l}</span></button>`).join('')}</nav>${S.settings.adminPin?`<button class="rolechip ${adminOk?'on':''}" data-act="role">${adminOk?'Admin':'Scorekeeper'}</button>`:''}${net!=='lokal'?`<span class="net ${net}">${net==='live'?'Live':'Offline'}</span>`:''}<div class="venue">${esc(tableName())}</div></header>`}
+return `<header class="top"><div class="brand"><a href="/konto" class="brandhome" title="Til kontoen">${brandMark('hdr')}</a>${clubLogo()?`<img class="clublogo" src="${clubLogo()}" alt="Klublogo">`:''}</div><div class="bbmenu"><button type="button" class="menubtn" id="bbmenubtn" data-act="menu" aria-haspopup="true" aria-expanded="${menuOpen}" aria-controls="bbmenulist"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span><span class="menucur">${esc((tabs.find(t=>t[0]===tab)||[,''])[1])}</span></button><nav id="bbmenulist" class="menulist" aria-label="Sider"${menuOpen?'':' hidden'}><ul>${tabs.map(([k,l])=>`<li><button type="button" class="nav ${tab===k?'on':''}" data-act="tab" data-v="${k}"${tab===k?' aria-current="page"':''}>${ic(k)}<span>${l}</span></button></li>`).join('')}</ul></nav></div>${S.settings.adminPin?`<button class="rolechip ${adminOk?'on':''}" data-act="role">${adminOk?'Admin':'Scorekeeper'}</button>`:''}${net!=='lokal'?`<span class="net ${net}">${net==='live'?'Live':'Offline'}</span>`:''}<div class="venue">${esc(tableName())}</div></header>`}
 
+/* Menu-knap med rulleliste i toppen. Åbn/luk ændrer kun DOM'en, så en kamp aldrig gen-tegnes. */
+function syncMenu(){const b=document.getElementById('bbmenubtn'),l=document.getElementById('bbmenulist');if(b)b.setAttribute('aria-expanded',String(menuOpen));if(l)l.hidden=!menuOpen}
+function setMenu(open,focus){menuOpen=open;syncMenu();if(focus==='btn')document.getElementById('bbmenubtn')?.focus();else if(focus==='item'){const l=document.getElementById('bbmenulist');(l?.querySelector('[aria-current="page"]')||l?.querySelector('button'))?.focus()}}
 function sideTeams(){return setup.teams&&setup.teams.length?setup.teams.filter(id=>T(id)&&T(id).pids.length):null}
 function groupSides(){const tm=sideTeams();if(tm)return tm.map(id=>T(id).pids.slice());const s=setup.sel;if(!setup.pairs)return s.map(x=>[x]);const o=[];for(let i=0;i<s.length;i+=2)o.push(s.slice(i,i+2));return o}
 
@@ -1766,7 +1781,7 @@ else if(MODE.startsWith('overlay'))root.innerHTML=ovDesignStyle()+overlay();
 else if(MODE==='sponsor'||MODE==='sponsor-green')root.innerHTML=sponsorView();
 else if(MODE==='mig'||MODE.startsWith('profil/'))root.innerHTML=phoneView();
 else if(isRemoteMode())root.innerHTML=remoteView();
-else root.innerHTML=header()+`<main class="main">${({game:viewGame,players:viewPlayers,tour:viewTour,matrix:viewMatrix,rank:viewRank,history:viewHistory,media:viewMedia,settings:viewSettings})[tab]()}</main>`;
+else{const mf=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.bbmenu')?(document.activeElement.dataset.v||'btn'):null;root.innerHTML=header()+`<main class="main">${({game:viewGame,players:viewPlayers,tour:viewTour,matrix:viewMatrix,rank:viewRank,history:viewHistory,media:viewMedia,settings:viewSettings})[tab]()}</main>`;if(mf)(mf==='btn'?document.getElementById('bbmenubtn'):document.querySelector(`#bbmenulist [data-v="${mf}"]`))?.focus()}
 if(S.game)S.game.sides.forEach(s=>prev[s.id]=s.score);fitMatrix();syncFolderLooks();if(document.querySelector('.dsprev'))fitPrev()}
 function fitMatrix(){const tx=!MODE&&tab==='matrix'&&document.querySelector('.tmx');if(tx){fitText(tx);requestAnimationFrame(()=>fitText(tx))}}
 addEventListener('resize',()=>{clearTimeout(fitMatrix.t);fitMatrix.t=setTimeout(fitMatrix,120)});
@@ -2583,8 +2598,9 @@ function tourCard(){const st=S.settings;return `<section class="card"><h2>Turner
 ${tourFiles?`<div class="tfiles">${tourFiles.map(f=>`<div><b>${esc(f.name||f.file)}</b><small>${f.savedAt?new Date(f.savedAt).toLocaleString('da-DK'):''}${f.players!=null?' · '+f.players+' spillere · '+f.teams+' hold · kamp: '+esc(f.game||''):''}</small><button class="btn sm" data-act="tload" data-v="${esc(f.file)}">Åbn</button><button class="btn sm ghost danger" data-act="tdel" data-v="${esc(f.file)}">Slet</button></div>`).join('')||'<p class="mut">Ingen gemte turneringer endnu.</p>'}</div>`:''}</section>`}
 
 /* ---------- events ---------- */
-function act(a,v,el){const g=S.game;if(g&&g.paused&&!g.over&&PAUSE_BLOCK.has(a))return toast('⏸ Kampen er sat på pause – tryk ▶ Fortsæt');if((ADMIN_ACTS.has(a)||(a==='tab'&&(v==='settings'||v==='media')))&&!isAdmin()){askPin();return}switch(a){
-case 'tab':tab=v;render();scrollTo(0,0);break;
+function act(a,v,el){const g=S.game;if(g&&g.paused&&!g.over&&PAUSE_BLOCK.has(a))return toast('⏸ Kampen er sat på pause – tryk ▶ Fortsæt');if(a==='tab'&&menuOpen)setMenu(false);if((ADMIN_ACTS.has(a)||(a==='tab'&&(v==='settings'||v==='media')))&&!isAdmin()){askPin();return}switch(a){
+case 'menu':setMenu(!menuOpen,menuOpen?'btn':'item');break;
+case 'tab':menuOpen=false;tab=v;render();scrollTo(0,0);break;
 case 'pick':{setup.teams=[];const i=setup.sel.indexOf(v);if(i>=0)setup.sel.splice(i,1);else if(setup.sel.length<20)setup.sel.push(v);render();break}
 case 'pairs':setup.pairs=!setup.pairs;render();break;
 case 'setp':{const k=el.dataset.k;setup[k]=isNaN(+v)?v:+v;render();break}
@@ -2809,6 +2825,12 @@ document.addEventListener('pointerup',e=>{
   placePanel(drag.id,place,e.clientY);
   render();
 });
+document.addEventListener('click',e=>{if(menuOpen&&!e.target.closest('.bbmenu'))setMenu(false)},true);
+document.addEventListener('keydown',e=>{const inMenu=e.target.closest&&e.target.closest('.bbmenu');if(menuOpen&&e.key==='Escape'){e.preventDefault();e.stopPropagation();setMenu(false,'btn');return}
+ if(!inMenu)return;
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){const items=[...document.querySelectorAll('#bbmenulist button')];if(!items.length)return;e.preventDefault();if(!menuOpen){setMenu(true,'item');return}const i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus()}
+ /* Enter/mellemrum aktiverer knappen som normalt, men må ikke nå tavlens tastaturgenveje (point). */
+ if(e.key==='Enter'||e.key===' ')e.stopPropagation()},true);
 document.addEventListener('click',e=>{if(e.target.id==='modal')return closeModal();const b=e.target.closest('[data-act]');if(!b||b.disabled)return;act(b.dataset.act,b.dataset.v,b)});
 document.addEventListener('input',e=>{const t=e.target;
 if(t.dataset&&t.dataset.dz&&dEdit){const k=t.dataset.dz;if(k.startsWith('c.'))dEdit.c[k.slice(2)]=t.value;else dEdit[k]=t.value;if(k!=='name')refreshDPrev();return}
