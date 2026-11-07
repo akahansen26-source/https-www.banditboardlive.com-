@@ -1845,6 +1845,7 @@ function keglerInStroke(g){if(g.pending.some(x=>x&&x.k===true))return true;if(g.
 function commit(confirmed){const g=live();if(!g||g.mode==='point')return;if(g.mode==='dart'){if(dMode(g)==='total')act('dtot');return}
 if(g.entry&&ev(g)<0&&minusOpp()){const n=-ev(g);g.entry='';giveSk(g,g.sides[g.turn],n,{manual:true,noSave:true});skipUndo=true;setTimeout(()=>{skipUndo=false},0)}
 if(g.entry){if(ev(g))g.pending.push({v:ev(g),k:null});g.entry=''}
+{const neg=g.pending.filter(x=>pv(x)<0);if(neg.length){const n=-neg.reduce((a,x)=>a+pv(x),0);g.pending=g.pending.filter(x=>pv(x)>=0);giveSk(g,g.sides[g.turn],n,{manual:true,noSave:true});skipUndo=true;setTimeout(()=>{skipUndo=false},0)}}
 const tot=g.pending.reduce((a,x)=>a+pv(x),0),s=g.sides[g.turn];
 if(g.mode==='kegle')return commitKegle(g,s,tot);
 const after=g.dir==='down'?s.score-tot:s.score+tot;
@@ -1928,7 +1929,7 @@ function visModal(){const keys=`<h3 style="margin-top:16px">Taster på tastature
 openModal(`<h2>Tilpas visning</h2><p class="mut">Vælg hvad der skal vises i hvert modul. Ændringer gemmes med det samme.</p>${visMatrix()}${keys}<div class="mact"><button class="btn ghost" data-act="visall">Slå alt til</button><span class="sp"></span><button class="btn pri" data-act="close">Færdig</button></div>`)}
 
 /* ---------- ret tal manuelt: +5, 5+, -3, 3-, eller 40 = sæt til 40 ---------- */
-const minusOpp=()=>S.settings.minusMode!=='self';
+const minusOpp=()=>{const g=S&&S.game;if(g&&(g.mode==='skomager'||g.mode==='kegle'||g.mode==='billard'||(g.mode!=='point'&&g.mode!=='dart')))return true;return S.settings.minusMode!=='self'};
 /* Streng validering af manuelt indtastede point: kun hele tal, evt. med + eller - foran (fx -6, 6, +6). Afviser abc, --, - -, 6-, -abc. */
 function wholeNum(str){const t=String(str==null?'':str).trim().replace(/[−–]/g,'-');return /^[+-]?\d{1,4}$/.test(t)?parseInt(t,10):null}
 /* Minuspoint: den valgte side/spiller får minus (vises som skæve), alle modstandere får pointene */
@@ -2338,7 +2339,7 @@ ${vis('plog')?plogHTML(g):''}${minusOpp()?'':skBar(g)}
 <div class="kbd">Esc = fortryd seneste point</div></aside>`}
 function pointSettingsCard(){const pe=pointEngine(),l=[...pe.all].sort((a,b)=>(a.v<0)-(b.v<0)||Math.abs(a.v)-Math.abs(b.v));
 return `<section class="card"><h2>Pointmotor – tilpas point</h2><p class="mut">Vælg hvilke knapper der vises i Pointtavlen (og som faste tal i Skomager). Tryk for at slå til/fra.</p>
-<div class="fldrow"><span>Minusknapper</span><div class="seg"><button class="${minusOpp()?'on':''}" data-act="sset" data-k="minusMode" data-v="opp">Går til modstanderne</button><button class="${minusOpp()?'':'on'}" data-act="sset" data-k="minusMode" data-v="self">Trækkes fra egen score</button></div></div>
+<div class="fldrow"><span>Minusknapper</span><div class="seg"><button class="${minusOpp()?'on':''}" data-act="sset" data-k="minusMode" data-v="opp">Går til modstanderne</button><button class="${minusOpp()?'':'on'}" data-act="sset" data-k="minusMode" data-v="self">Trækkes fra egen score (kun pointtavle)</button></div></div>
 <div class="ptoggles">${l.map(x=>`<span class="ptg ${x.v<0?'n':'p'} ${x.on?'on':''}"><button data-act="ptog" data-v="${x.v}" aria-pressed="${x.on}">${x.v>0?'+':'−'}${Math.abs(x.v)}</button>${POINT_DEFAULTS.includes(x.v)?'':`<button class="prm" data-act="prm" data-v="${x.v}" aria-label="Fjern ${x.v}">×</button>`}</span>`).join('')}</div>
 <div class="row" style="margin-top:12px"><input id="pnewval" type="number" placeholder="Ny værdi, fx 18 eller -20" style="flex:1;width:auto"><button class="btn pri" data-act="pnew">Tilføj knap</button></div>
 <div class="row" style="margin-top:10px"><button class="btn sm ghost" data-act="preset">Nulstil til standard</button></div></section>`}
@@ -2921,6 +2922,16 @@ else if(k==='Backspace'&&g.kpad==='num'){act('bk')}
 else if(k==='+'){act('plus')}});
 if(MODE==='tv')document.addEventListener('dblclick',()=>document.documentElement.requestFullscreen?.());
 
+/* ---------- automatisk opdatering: åbne tavler henter selv en ny version, når den er lagt ud ---------- */
+const BOARD_BUILD='2026-11-07-skaeve-2';
+function buildWatch(){setInterval(async()=>{try{
+  const r=await fetch('/board.html?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+  const m=/const BOARD_BUILD='([^']+)'/.exec(await r.text());if(!m||m[1]===BOARD_BUILD)return;
+  const g=S&&S.game,busy=!$('#modal').hidden||(g&&(g.entry||(g.pending&&g.pending.length)))||scheduleCloud.pending;
+  if(busy)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  if(!MODE)toast('Ny version af scoreboardet – opdaterer …');setTimeout(()=>location.reload(),MODE?0:1500);
+}catch(e){}},180000)}
+
 /* ---------- Stream Deck / fjernbetjening ----------
    Stream Deck-pluginnet sender et knaptryk til serveren. Det åbne scoreboard henter trykket og klikker
    på præcis samme knap, som hvis man trykkede selv – så alle regler, pause, PIN osv. gælder uændret. */
@@ -3172,6 +3183,7 @@ async function startApp(){
   if(!remote&&has(S)) scheduleCloud();
   clearInterval(cloudTimer); cloudTimer=setInterval(pullCloud,3000);
   sdBoot();
+  buildWatch();
   if(!MODE&&S.game&&!S.game.over)toast('Uafsluttet kamp gendannet');
 }
 addEventListener('hashchange',()=>location.reload());
