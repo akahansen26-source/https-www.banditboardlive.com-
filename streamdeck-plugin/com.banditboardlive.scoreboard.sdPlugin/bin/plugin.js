@@ -6590,11 +6590,39 @@ async function paintButton(action, s) {
   await action.setImage(buttonImage(s.a, s.v ?? "", s.label || s.a));
   await action.setTitle("");
 }
+var LAYOUTS = {
+  spil: [
+    [null, null, null, { a: "tstart", label: "Start tur" }, { a: "tprev", label: "Forrige" }, { a: "tnextp", label: "N\xE6ste spiller" }, { a: "tnextt", label: "N\xE6ste tur" }, { a: "rpause", label: "Pause" }],
+    [{ a: "add", v: "2#kegle", label: "Kegle +2" }, { a: "add", v: "6#konge", label: "Konge alene +6" }, { a: "add", v: "4#roedt", label: "R\xF8dt / blegt +4" }, { a: "add", v: "2#hul", label: "Hvid i hul +2" }, { a: "add", v: "16#alle", label: "Alle kegler +16" }, { a: "foul", v: "0", label: "Fejl point" }, { a: "foul", v: "2", label: "R\xF8d i hul" }, { a: "foul", v: "6", label: "Fejl 6 + point" }],
+    [{ a: "dig", v: "1", label: "1" }, { a: "dig", v: "2", label: "2" }, { a: "dig", v: "3", label: "3" }, { a: "dig", v: "4", label: "4" }, { a: "dig", v: "5", label: "5" }, { a: "bk", label: "Slet ciffer" }, { a: "sign", label: "Minus" }, { a: "kent", label: "Enter" }],
+    [{ a: "dig", v: "6", label: "6" }, { a: "dig", v: "7", label: "7" }, { a: "dig", v: "8", label: "8" }, { a: "dig", v: "9", label: "9" }, { a: "dig", v: "0", label: "0" }, { a: "plus", label: "L\xE6g til serien" }, { a: "undo", label: "Fortryd slag" }, { a: "__next", label: "N\xE6ste / Serie slut" }]
+  ],
+  kamp: [
+    [{ a: "__skt", v: "1", label: "Minus til spiller 1" }, { a: "__skt", v: "2", label: "Minus til spiller 2" }, { a: "sk", v: "2", label: "\u22122" }, { a: "sk", v: "4", label: "\u22124" }, { a: "sk", v: "6", label: "\u22126" }, { a: "sk", v: "8", label: "\u22128" }, { a: "sk", v: "10", label: "\u221210" }, { a: "sk", v: "12", label: "\u221212" }],
+    [{ a: "sk", v: "14", label: "\u221214" }, { a: "sk", v: "16", label: "\u221216" }, { a: "__undo", label: "Fortryd" }, null, { a: "tmstart", label: "Timer" }, { a: "rpause", label: "Pause" }, { a: "reserve", label: "Reserver" }, { a: "end", label: "Afslut" }],
+    [{ a: "view", v: "classic", label: "Klassisk" }, { a: "view", v: "duo", label: "2-spiller" }, { a: "view", v: "modern", label: "Moderne" }, { a: "view", v: "big", label: "TV" }, null, null, null, { a: "breset", label: "Nulstil tavle" }],
+    [{ a: "bsel", v: "bord_1", label: "Bord 1" }, { a: "bsel", v: "bord_2", label: "Bord 2" }, { a: "bsel", v: "bord_3", label: "Bord 3" }, { a: "bsel", v: "bord_4", label: "Bord 4" }, null, null, null, null]
+  ]
+};
+function autoSlot(coords) {
+  const L = globals.autoLayout ? LAYOUTS[globals.autoLayout] : void 0;
+  if (!L || !coords) return null;
+  return L[coords.row]?.[coords.column] ?? null;
+}
+var SCORE_AUTO = { 0: "0", 1: "turn", 2: "1" };
 var ButtonAction = class extends SingletonAction {
   manifestId = "com.banditboardlive.scoreboard.button";
   busy = /* @__PURE__ */ new Set();
   async onWillAppear(ev) {
-    if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
+    let settings2 = ev.payload.settings;
+    if (!settings2.a && "coordinates" in ev.payload) {
+      const slot = autoSlot(ev.payload.coordinates);
+      if (slot) {
+        settings2 = { a: slot.a, v: slot.v ?? "", label: slot.label };
+        await ev.action.setSettings(settings2);
+      }
+    }
+    if (ev.action.isKey()) await paintButton(ev.action, settings2);
   }
   async onDidReceiveSettings(ev) {
     if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
@@ -6638,7 +6666,13 @@ function wrap(label) {
 var ScoreAction = class extends SingletonAction {
   manifestId = "com.banditboardlive.scoreboard.score";
   async onWillAppear(ev) {
-    if (ev.action.isKey()) await paint(ev.action, ev.payload.settings);
+    let settings2 = ev.payload.settings;
+    const c = "coordinates" in ev.payload ? ev.payload.coordinates : void 0;
+    if (settings2.side === void 0 && globals.autoLayout === "spil" && c && c.row === 0 && SCORE_AUTO[c.column]) {
+      settings2 = { side: SCORE_AUTO[c.column] };
+      await ev.action.setSettings(settings2);
+    }
+    if (ev.action.isKey()) await paint(ev.action, settings2);
     ensurePolling();
   }
   async onWillDisappear(ev) {

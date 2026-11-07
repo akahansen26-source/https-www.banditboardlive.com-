@@ -7,7 +7,7 @@ import streamDeck, { SingletonAction, type KeyDownEvent, type WillAppearEvent, t
  * trykket præcis som et klik. Virker uanset om OBS/Streamlabs har fokus.
  */
 
-type Globals = { server?: string; token?: string };
+type Globals = { server?: string; token?: string; autoLayout?: string };
 type ButtonSettings = { a?: string; v?: string; label?: string; confirm?: boolean; okMark?: boolean; plainTitle?: boolean };
 type ScoreSettings = { side?: string; press?: string };
 type Side = { name: string; score: number | string; on: boolean };
@@ -88,13 +88,45 @@ async function paintButton(action: { setImage: (i?: string) => Promise<void>; se
   await action.setTitle("");
 }
 
+
+/* ---------- hurtig-opsætning: tomme taster konfigurerer sig selv efter placering ---------- */
+type Slot = { a: string; v?: string; label: string };
+const LAYOUTS: Record<string, (Slot | null)[][]> = {
+  spil: [
+    [null, null, null, { a: "tstart", label: "Start tur" }, { a: "tprev", label: "Forrige" }, { a: "tnextp", label: "Næste spiller" }, { a: "tnextt", label: "Næste tur" }, { a: "rpause", label: "Pause" }],
+    [{ a: "add", v: "2#kegle", label: "Kegle +2" }, { a: "add", v: "6#konge", label: "Konge alene +6" }, { a: "add", v: "4#roedt", label: "Rødt / blegt +4" }, { a: "add", v: "2#hul", label: "Hvid i hul +2" }, { a: "add", v: "16#alle", label: "Alle kegler +16" }, { a: "foul", v: "0", label: "Fejl point" }, { a: "foul", v: "2", label: "Rød i hul" }, { a: "foul", v: "6", label: "Fejl 6 + point" }],
+    [{ a: "dig", v: "1", label: "1" }, { a: "dig", v: "2", label: "2" }, { a: "dig", v: "3", label: "3" }, { a: "dig", v: "4", label: "4" }, { a: "dig", v: "5", label: "5" }, { a: "bk", label: "Slet ciffer" }, { a: "sign", label: "Minus" }, { a: "kent", label: "Enter" }],
+    [{ a: "dig", v: "6", label: "6" }, { a: "dig", v: "7", label: "7" }, { a: "dig", v: "8", label: "8" }, { a: "dig", v: "9", label: "9" }, { a: "dig", v: "0", label: "0" }, { a: "plus", label: "Læg til serien" }, { a: "undo", label: "Fortryd slag" }, { a: "__next", label: "Næste / Serie slut" }],
+  ],
+  kamp: [
+    [{ a: "__skt", v: "1", label: "Minus til spiller 1" }, { a: "__skt", v: "2", label: "Minus til spiller 2" }, { a: "sk", v: "2", label: "−2" }, { a: "sk", v: "4", label: "−4" }, { a: "sk", v: "6", label: "−6" }, { a: "sk", v: "8", label: "−8" }, { a: "sk", v: "10", label: "−10" }, { a: "sk", v: "12", label: "−12" }],
+    [{ a: "sk", v: "14", label: "−14" }, { a: "sk", v: "16", label: "−16" }, { a: "__undo", label: "Fortryd" }, null, { a: "tmstart", label: "Timer" }, { a: "rpause", label: "Pause" }, { a: "reserve", label: "Reserver" }, { a: "end", label: "Afslut" }],
+    [{ a: "view", v: "classic", label: "Klassisk" }, { a: "view", v: "duo", label: "2-spiller" }, { a: "view", v: "modern", label: "Moderne" }, { a: "view", v: "big", label: "TV" }, null, null, null, { a: "breset", label: "Nulstil tavle" }],
+    [{ a: "bsel", v: "bord_1", label: "Bord 1" }, { a: "bsel", v: "bord_2", label: "Bord 2" }, { a: "bsel", v: "bord_3", label: "Bord 3" }, { a: "bsel", v: "bord_4", label: "Bord 4" }, null, null, null, null],
+  ],
+};
+function autoSlot(coords: { row: number; column: number } | undefined): Slot | null {
+  const L = globals.autoLayout ? LAYOUTS[globals.autoLayout] : undefined;
+  if (!L || !coords) return null;
+  return L[coords.row]?.[coords.column] ?? null;
+}
+const SCORE_AUTO: Record<number, string> = { 0: "0", 1: "turn", 2: "1" };
+
 /* ---------- Scoreboard-knap ---------- */
 class ButtonAction extends SingletonAction<ButtonSettings> {
   override readonly manifestId = "com.banditboardlive.scoreboard.button";
   private busy = new Set<string>();
 
   override async onWillAppear(ev: WillAppearEvent<ButtonSettings>) {
-    if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
+    let settings = ev.payload.settings;
+    if (!settings.a && "coordinates" in ev.payload) {
+      const slot = autoSlot(ev.payload.coordinates as { row: number; column: number });
+      if (slot) {
+        settings = { a: slot.a, v: slot.v ?? "", label: slot.label };
+        await ev.action.setSettings(settings);
+      }
+    }
+    if (ev.action.isKey()) await paintButton(ev.action, settings);
   }
   override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<ButtonSettings>) {
     if (ev.action.isKey()) await paintButton(ev.action, ev.payload.settings);
@@ -140,7 +172,13 @@ function wrap(label: string) {
 class ScoreAction extends SingletonAction<ScoreSettings> {
   override readonly manifestId = "com.banditboardlive.scoreboard.score";
   override async onWillAppear(ev: WillAppearEvent<ScoreSettings>) {
-    if (ev.action.isKey()) await paint(ev.action, ev.payload.settings);
+    let settings = ev.payload.settings;
+    const c = "coordinates" in ev.payload ? (ev.payload.coordinates as { row: number; column: number }) : undefined;
+    if (settings.side === undefined && globals.autoLayout === "spil" && c && c.row === 0 && SCORE_AUTO[c.column]) {
+      settings = { side: SCORE_AUTO[c.column] };
+      await ev.action.setSettings(settings);
+    }
+    if (ev.action.isKey()) await paint(ev.action, settings);
     ensurePolling();
   }
   override async onWillDisappear(ev: { action: { id: string } }) {

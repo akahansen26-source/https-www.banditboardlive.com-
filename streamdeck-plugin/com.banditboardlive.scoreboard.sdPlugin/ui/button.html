@@ -15,7 +15,9 @@
 <div class="status"><span id="conn" class="mut">Forbinder …</span></div>
 <div class="row" style="margin-top:6px"><button id="refresh" type="button">Opdatér</button></div>
 <p class="mut">Nøglen laver du på scoreboardet: tryk <b>🎛 Stream Deck</b> → <b>Lav nøgle</b> → <b>Kopiér</b>. Den gælder for alle taster.</p>
-<details><summary>Avanceret</summary><label for="server">Server</label><input id="server" type="url"></details>
+<details><summary>Avanceret</summary><label for="server">Server</label><input id="server" type="url">
+<label for="auto">Hurtig-opsætning af nye taster</label><select id="auto"><option value="">Fra</option><option value="spil">Side 1: Spil (point, tal, tur)</option><option value="kamp">Side 2: Minuspoint og kamp</option></select>
+<p class="mut">Når den er slået til, får en ny, tom tast automatisk den funktion, der hører til dens plads. Slå den fra igen bagefter.</p></details>
 <script src="pi.js"></script>
 <script>
 const keyOf=(a,v)=>a+'|'+(v||'');
