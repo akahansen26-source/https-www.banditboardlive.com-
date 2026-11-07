@@ -1,0 +1,27 @@
+<!doctype html><html lang="da"><head><meta charset="utf-8"><link rel="stylesheet" href="pi.css"></head><body>
+<h3>Vis på tasten</h3>
+<label for="side">Hvad skal tasten vise?</label>
+<select id="side">
+<option value="0">Spiller/hold 1 – navn og point</option>
+<option value="1">Spiller/hold 2 – navn og point</option>
+<option value="2">Spiller/hold 3 – navn og point</option>
+<option value="3">Spiller/hold 4 – navn og point</option>
+<option value="active">Den der har turen – navn og point</option>
+<option value="turn">Hvis tur er det (navn og runde)</option>
+</select>
+<label for="press">Når tasten trykkes</label>
+<select id="press"><option value="">Opdatér visningen</option><option value="__next">Næste / Serie slut</option><option value="__undo">Fortryd</option></select>
+<p class="mut">Tasten opdateres automatisk, når pointene ændrer sig på scoreboardet.</p>
+<h3>Forbindelse</h3>
+<label for="token">Nøgle fra scoreboardet</label>
+<input id="token" type="password" placeholder="bbsd_…" autocomplete="off">
+<div class="status"><span id="conn" class="mut">Forbinder …</span></div>
+<div class="row" style="margin-top:6px"><button id="refresh" type="button">Opdatér</button></div>
+<p class="mut">Nøglen laver du på scoreboardet: tryk <b>🎛 Stream Deck</b> → <b>Lav nøgle</b> → <b>Kopiér</b>. Den gælder for alle taster.</p>
+<details><summary>Avanceret</summary><label for="server">Server</label><input id="server" type="url"></details>
+<script src="pi.js"></script>
+<script>
+window.onSettings=(s)=>{document.getElementById('side').value=s.side||'0';document.getElementById('press').value=s.press||''};
+document.getElementById('side').addEventListener('change',e=>{settings.side=e.target.value;saveSettings()});
+document.getElementById('press').addEventListener('change',e=>{settings.press=e.target.value;saveSettings()});
+</script></body></html>

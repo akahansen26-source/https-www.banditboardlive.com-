@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "Name": "BanditBoard Live",
+  "Version": "1.0.0.0",
+  "Author": "BanditBoard Live",
+  "Description": "Styr BanditBoard Live-scoreboardet fra Stream Deck: tryk på alle scoreboardets knapper og vis point og tur direkte på tasterne. Virker mens OBS eller Streamlabs er i fokus.",
+  "UUID": "com.banditboardlive.scoreboard",
+  "Icon": "imgs/plugin/icon",
+  "Category": "BanditBoard Live",
+  "CategoryIcon": "imgs/plugin/category",
+  "CodePath": "bin/plugin.js",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "6.5"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "disabled"
+  },
+  "Actions": [
+    {
+      "Name": "Scoreboard-knap",
+      "UUID": "com.banditboardlive.scoreboard.button",
+      "Icon": "imgs/actions/button/icon",
+      "Tooltip": "Trykker på en knap på BanditBoard Live-scoreboardet (fx Kegle +2, Næste, Fortryd, Pause).",
+      "PropertyInspectorPath": "ui/button.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/button/key",
+          "TitleAlignment": "middle",
+          "FontSize": 13,
+          "ShowTitle": true
+        }
+      ]
+    },
+    {
+      "Name": "Score og tur",
+      "UUID": "com.banditboardlive.scoreboard.score",
+      "Icon": "imgs/actions/score/icon",
+      "Tooltip": "Viser point for en spiller/hold, eller hvis tur det er – opdateres live.",
+      "PropertyInspectorPath": "ui/score.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/score/key",
+          "ShowTitle": false
+        }
+      ]
+    }
+  ]
+}
