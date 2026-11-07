@@ -19,13 +19,13 @@ function lookFor(a: string, vRaw: string, label: string): Look {
   switch (a) {
     case "__next": case "next": return { big: "»", cap: a === "next" ? "SERIE SLUT" : "NÆSTE", bg: C.enter, bigSize: 80 };
     case "__undo": case "undo": case "pundo": return { big: "↶", cap: a === "undo" ? "FORTRYD SLAG" : "FORTRYD", bg: C.danger, bigSize: 70 };
-    case "__skt": return { big: v || "1", cap: "MINUS TIL SPILLER", bg: C.minus, bigSize: 60 };
+    case "__skt": return { big: v || "1", cap: "SKÆVE AF SPILLER", bg: C.minus, bigSize: 60 };
     case "dig": return { big: v, cap: "", bg: C.num, bigSize: 84 };
     case "bk": return { big: "⌫", cap: "SLET", bg: C.num, bigSize: 56 };
     case "plus": return { big: "+", cap: "LÆG TIL", bg: C.num, bigSize: 84 };
-    case "sign": return { big: "−", cap: "MINUS", bg: C.minus, bigSize: 84 };
+    case "sign": return { big: "−", cap: "SKÆVE (−)", bg: C.minus, bigSize: 84 };
     case "kent": return { big: "↵", cap: "ENTER", bg: C.enter, bigSize: 70 };
-    case "sk": return { big: "−" + v, cap: "MINUSPOINT", bg: C.minus, bigSize: v.length > 1 ? 56 : 66 };
+    case "sk": return { big: v, cap: "SKÆVE", bg: C.minus, bigSize: v.length > 1 ? 60 : 70 };
     case "sktgt": return { big: fit(L, 8), cap: "MINUS TIL", bg: C.minus, bigSize: L.length > 6 ? 28 : 34 };
     case "foul": return v === "2" ? { big: "+2", cap: "RØD I HUL", bg: C.minus, bigSize: 60 } : v === "6" ? { big: "+6", cap: "FEJL 6", bg: C.minus, bigSize: 60 } : { big: "!", cap: "FEJL", bg: C.minus, bigSize: 70 };
     case "tstart": return { big: "▶", cap: "START TUR", bg: C.turn, bigSize: 60 };

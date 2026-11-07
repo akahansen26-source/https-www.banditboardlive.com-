@@ -99,7 +99,7 @@ const LAYOUTS: Record<string, (Slot | null)[][]> = {
     [{ a: "dig", v: "6", label: "6" }, { a: "dig", v: "7", label: "7" }, { a: "dig", v: "8", label: "8" }, { a: "dig", v: "9", label: "9" }, { a: "dig", v: "0", label: "0" }, { a: "plus", label: "Læg til serien" }, { a: "undo", label: "Fortryd slag" }, { a: "__next", label: "Næste / Serie slut" }],
   ],
   kamp: [
-    [{ a: "__skt", v: "1", label: "Minus til spiller 1" }, { a: "__skt", v: "2", label: "Minus til spiller 2" }, { a: "sk", v: "2", label: "−2" }, { a: "sk", v: "4", label: "−4" }, { a: "sk", v: "6", label: "−6" }, { a: "sk", v: "8", label: "−8" }, { a: "sk", v: "10", label: "−10" }, { a: "sk", v: "12", label: "−12" }],
+    [{ a: "__skt", v: "1", label: "Skæve af spiller 1" }, { a: "__skt", v: "2", label: "Skæve af spiller 2" }, { a: "sk", v: "2", label: "−2" }, { a: "sk", v: "4", label: "−4" }, { a: "sk", v: "6", label: "−6" }, { a: "sk", v: "8", label: "−8" }, { a: "sk", v: "10", label: "−10" }, { a: "sk", v: "12", label: "−12" }],
     [{ a: "sk", v: "14", label: "−14" }, { a: "sk", v: "16", label: "−16" }, { a: "__undo", label: "Fortryd" }, null, { a: "tmstart", label: "Timer" }, { a: "rpause", label: "Pause" }, { a: "reserve", label: "Reserver" }, { a: "end", label: "Afslut" }],
     [{ a: "view", v: "classic", label: "Klassisk" }, { a: "view", v: "duo", label: "2-spiller" }, { a: "view", v: "modern", label: "Moderne" }, { a: "view", v: "big", label: "TV" }, null, null, null, { a: "breset", label: "Nulstil tavle" }],
     [{ a: "bsel", v: "bord_1", label: "Bord 1" }, { a: "bsel", v: "bord_2", label: "Bord 2" }, { a: "bsel", v: "bord_3", label: "Bord 3" }, { a: "bsel", v: "bord_4", label: "Bord 4" }, null, null, null, null],

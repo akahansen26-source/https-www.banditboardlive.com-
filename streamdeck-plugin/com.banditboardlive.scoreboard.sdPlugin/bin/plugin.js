@@ -3762,7 +3762,7 @@ function lookFor(a, vRaw, label) {
     case "pundo":
       return { big: "\u21B6", cap: a === "undo" ? "FORTRYD SLAG" : "FORTRYD", bg: C.danger, bigSize: 70 };
     case "__skt":
-      return { big: v || "1", cap: "MINUS TIL SPILLER", bg: C.minus, bigSize: 60 };
+      return { big: v || "1", cap: "SK\xC6VE AF SPILLER", bg: C.minus, bigSize: 60 };
     case "dig":
       return { big: v, cap: "", bg: C.num, bigSize: 84 };
     case "bk":
@@ -3770,11 +3770,11 @@ function lookFor(a, vRaw, label) {
     case "plus":
       return { big: "+", cap: "L\xC6G TIL", bg: C.num, bigSize: 84 };
     case "sign":
-      return { big: "\u2212", cap: "MINUS", bg: C.minus, bigSize: 84 };
+      return { big: "\u2212", cap: "SK\xC6VE (\u2212)", bg: C.minus, bigSize: 84 };
     case "kent":
       return { big: "\u21B5", cap: "ENTER", bg: C.enter, bigSize: 70 };
     case "sk":
-      return { big: "\u2212" + v, cap: "MINUSPOINT", bg: C.minus, bigSize: v.length > 1 ? 56 : 66 };
+      return { big: v, cap: "SK\xC6VE", bg: C.minus, bigSize: v.length > 1 ? 60 : 70 };
     case "sktgt":
       return { big: fit(L, 8), cap: "MINUS TIL", bg: C.minus, bigSize: L.length > 6 ? 28 : 34 };
     case "foul":
@@ -6598,7 +6598,7 @@ var LAYOUTS = {
     [{ a: "dig", v: "6", label: "6" }, { a: "dig", v: "7", label: "7" }, { a: "dig", v: "8", label: "8" }, { a: "dig", v: "9", label: "9" }, { a: "dig", v: "0", label: "0" }, { a: "plus", label: "L\xE6g til serien" }, { a: "undo", label: "Fortryd slag" }, { a: "__next", label: "N\xE6ste / Serie slut" }]
   ],
   kamp: [
-    [{ a: "__skt", v: "1", label: "Minus til spiller 1" }, { a: "__skt", v: "2", label: "Minus til spiller 2" }, { a: "sk", v: "2", label: "\u22122" }, { a: "sk", v: "4", label: "\u22124" }, { a: "sk", v: "6", label: "\u22126" }, { a: "sk", v: "8", label: "\u22128" }, { a: "sk", v: "10", label: "\u221210" }, { a: "sk", v: "12", label: "\u221212" }],
+    [{ a: "__skt", v: "1", label: "Sk\xE6ve af spiller 1" }, { a: "__skt", v: "2", label: "Sk\xE6ve af spiller 2" }, { a: "sk", v: "2", label: "\u22122" }, { a: "sk", v: "4", label: "\u22124" }, { a: "sk", v: "6", label: "\u22126" }, { a: "sk", v: "8", label: "\u22128" }, { a: "sk", v: "10", label: "\u221210" }, { a: "sk", v: "12", label: "\u221212" }],
     [{ a: "sk", v: "14", label: "\u221214" }, { a: "sk", v: "16", label: "\u221216" }, { a: "__undo", label: "Fortryd" }, null, { a: "tmstart", label: "Timer" }, { a: "rpause", label: "Pause" }, { a: "reserve", label: "Reserver" }, { a: "end", label: "Afslut" }],
     [{ a: "view", v: "classic", label: "Klassisk" }, { a: "view", v: "duo", label: "2-spiller" }, { a: "view", v: "modern", label: "Moderne" }, { a: "view", v: "big", label: "TV" }, null, null, null, { a: "breset", label: "Nulstil tavle" }],
     [{ a: "bsel", v: "bord_1", label: "Bord 1" }, { a: "bsel", v: "bord_2", label: "Bord 2" }, { a: "bsel", v: "bord_3", label: "Bord 3" }, { a: "bsel", v: "bord_4", label: "Bord 4" }, null, null, null, null]
