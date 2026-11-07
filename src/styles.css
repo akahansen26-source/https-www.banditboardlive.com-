@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  /* Lys, varm hjemmeside: offwhite, sand og dæmpet grøn. */
-  --color-bg: #f7f4ee;
-  --color-surface: #ffffff;
-  --color-surface-2: #efeae0;
-  --color-deep: #ebe5d9;
-  --color-fg: #1f2622;
-  --color-muted: #5d665f;
-  --color-primary: #3d6b52;
+  /* Lys hjemmeside: varm grå side, sarte blågrå bokse, mørk skifer og afdæmpet kobber. */
+  --color-bg: #ebe9e5;
+  --color-surface: #f3f5f7;
+  --color-surface-2: #e2e6eb;
+  --color-deep: #d9dfe6;
+  --color-fg: #1f2a37;
+  --color-muted: #4d5866;
+  --color-primary: #9c4a20;
   --color-primary-fg: #ffffff;
-  --color-accent: #8a6a3a;
-  --color-line: #ddd5c6;
-  --color-danger: #b42318;
-  --color-ok: #2f7d4f;
+  --color-accent: #8a4520;
+  --color-line: #c9d0d8;
+  --color-danger: #a8261b;
+  --color-ok: #2f6f4a;
   --font-sans: "Archivo", system-ui, sans-serif;
   --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --radius-card: 1rem;
