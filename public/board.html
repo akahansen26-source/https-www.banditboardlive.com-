@@ -71,6 +71,14 @@ h1{font-size:40px}h2{font-size:26px}h3{font-size:19px}
 /* Sidenavnet skal altid kunne ses i rullelisten – også på mobil. */
 .menulist .app-nav-label{display:inline;color:inherit;font:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .menulist .nav svg{flex:none}
+.menulist a.nav{text-decoration:none;color:var(--text)}
+.menusep{height:1px;margin:4px 6px;background:var(--line)}
+.moresports{margin-top:6px;grid-column:1/-1}
+.moresports .msg{margin:14px 0 6px;font:700 13px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--a2)}
+.mslist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.mslist a{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);text-decoration:none;font:600 15px var(--body)}
+.mslist a:hover,.mslist a:focus-visible{border-color:var(--a1);outline:none}
+.mslist a span[aria-hidden]{font-size:20px}
 @media (max-width:520px){.menucur{display:none}.menubtn{padding:0 12px}}
 .venue{font:700 16px var(--disp);color:var(--muted);padding-left:6px}
 @media (max-width:980px){.venue{display:none}}
@@ -1065,7 +1073,7 @@ function coreOf(){const c=Object.assign({},S);delete c.audit;c.players=S.players
 function pushImg(id,data){if(sock&&sock.connected)sock.emit('img',{id,data})}
 function logA(action,obj,user){const e={id:uid()+uid(),at:Date.now(),user:user||S.settings.operator||'Ukendt',action,obj:obj||''};S.audit.push(e);if(sock&&sock.connected)sock.emit('audit',e)}
 
-let menuOpen=false,tab='game',ptab='p',pq='',hf='all',editing=null,pendingYes=null,pendingNo=null,undo=[],prev={},arranging=false;
+let sportsCat=null,sportsLoading=false;let menuOpen=false,tab='game',ptab='p',pq='',hf='all',editing=null,pendingYes=null,pendingNo=null,undo=[],prev={},arranging=false;
 if({game:1,players:1,tour:1,matrix:1,rank:1,history:1,media:1,settings:1}[MODE]){tab=MODE;MODE=''}
 let setup={sel:[],pairs:false,mode:'skomager',start:60,dir:'down',target:300,pind:true,elim:false,teams:[]};
 if(S.lastSetup)setup=Object.assign({},setup,S.lastSetup,{sel:[],teams:[]});
@@ -1091,7 +1099,7 @@ const roundTotal=g=>g.pending.reduce((a,x)=>a+pv(x),0)+ev(g);
 const shooter=s=>P(s.pids[(s.cur||0)%s.pids.length]);
 const bump=s=>(prev[s.id]!==undefined&&prev[s.id]!==s.score)?'bump':'';
 const kStats=(s,g)=>{const n=s.rounds.length;return `<span>Serie <b>${n?s.rounds[n-1]:0}</b></span><span>Snit <b>${n?(s.score/n).toFixed(1):'0.0'}</b></span><span>Mangler <b>${Math.max(0,g.target-s.score)}</b></span>`};
-const I={game:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',players:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',tour:'<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"/>',history:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',media:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/>',rank:'<path d="M6 20V10M12 20V4M18 20v-7"/>',matrix:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M8.5 4v16M14 4v16"/>',settings:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'};
+const I={home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',game:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',players:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',tour:'<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"/>',history:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',media:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/>',rank:'<path d="M6 20V10M12 20V4M18 20v-7"/>',matrix:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M8.5 4v16M14 4v16"/>',settings:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'};
 const ic=n=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
 function openModal(h){$('#sheet').innerHTML=h;$('#modal').hidden=false}
@@ -1101,11 +1109,17 @@ function applyTheme(){const d=document.documentElement.dataset,st=S.settings;d.s
 
 /* ---------- views ---------- */
 function header(){const tabs=[['game','Spil'],['players','Kartotek'],['tour','Turneringer'],['matrix','Oversigt'],['rank','Rangliste'],['history','Historik'],['media','Medier'],['settings','Indstillinger']];
-return `<header class="top"><div class="brand"><a href="/konto" class="brandhome" title="Til kontoen">${brandMark('hdr')}</a>${clubLogo()?`<img class="clublogo" src="${clubLogo()}" alt="Klublogo">`:''}</div><div class="bbmenu"><button type="button" class="menubtn" id="bbmenubtn" data-act="menu" aria-haspopup="true" aria-expanded="${menuOpen}" aria-controls="bbmenulist"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span><span class="menucur">${esc((tabs.find(t=>t[0]===tab)||[,''])[1])}</span></button><nav id="bbmenulist" class="menulist" aria-label="Sider"${menuOpen?'':' hidden'}><ul>${tabs.map(([k,l])=>`<li><button type="button" class="nav ${tab===k?'on':''}" data-act="tab" data-v="${k}"${tab===k?' aria-current="page"':''}>${ic(k)}<span class="app-nav-label">${l}</span></button></li>`).join('')}</ul></nav></div>${S.settings.adminPin?`<button class="rolechip ${adminOk?'on':''}" data-act="role">${adminOk?'Admin':'Scorekeeper'}</button>`:''}${net!=='lokal'?`<span class="net ${net}">${net==='live'?'Live':'Offline'}</span>`:''}<div class="venue">${esc(tableName())}</div></header>`}
+return `<header class="top"><div class="brand"><a href="/konto" class="brandhome" title="Til kontoen">${brandMark('hdr')}</a>${clubLogo()?`<img class="clublogo" src="${clubLogo()}" alt="Klublogo">`:''}</div><div class="bbmenu"><button type="button" class="menubtn" id="bbmenubtn" data-act="menu" aria-haspopup="true" aria-expanded="${menuOpen}" aria-controls="bbmenulist"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span><span class="menucur">${esc((tabs.find(t=>t[0]===tab)||[,''])[1])}</span></button><nav id="bbmenulist" class="menulist" aria-label="Sider"${menuOpen?'':' hidden'}><ul><li><a class="nav navhome" href="/">${ic('home')}<span class="app-nav-label">Forside</span></a></li><li class="menusep" role="separator"></li>${tabs.map(([k,l])=>`<li><button type="button" class="nav ${tab===k?'on':''}" data-act="tab" data-v="${k}"${tab===k?' aria-current="page"':''}>${ic(k)}<span class="app-nav-label">${l}</span></button></li>`).join('')}</ul></nav></div>${S.settings.adminPin?`<button class="rolechip ${adminOk?'on':''}" data-act="role">${adminOk?'Admin':'Scorekeeper'}</button>`:''}${net!=='lokal'?`<span class="net ${net}">${net==='live'?'Live':'Offline'}</span>`:''}<div class="venue">${esc(tableName())}</div></header>`}
 
 /* Menu-knap med rulleliste i toppen. Åbn/luk ændrer kun DOM'en, så en kamp aldrig gen-tegnes. */
 function syncMenu(){const b=document.getElementById('bbmenubtn'),l=document.getElementById('bbmenulist');if(b)b.setAttribute('aria-expanded',String(menuOpen));if(l)l.hidden=!menuOpen}
-function setMenu(open,focus){menuOpen=open;syncMenu();if(focus==='btn')document.getElementById('bbmenubtn')?.focus();else if(focus==='item'){const l=document.getElementById('bbmenulist');(l?.querySelector('[aria-current="page"]')||l?.querySelector('button'))?.focus()}}
+function setMenu(open,focus){menuOpen=open;syncMenu();if(focus==='btn')document.getElementById('bbmenubtn')?.focus();else if(focus==='item'){const l=document.getElementById('bbmenulist');(l?.querySelector('[aria-current="page"]')||l?.querySelector('button, a'))?.focus()}}
+/* Flere sportsgrene: hentes fra den fælles sportskatalog-API og åbner en rigtig kamp i kampmotoren. */
+function loadSports(){if(sportsCat||sportsLoading)return;sportsLoading=true;fetch('/api/sports',{headers:{accept:'application/json'}}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(d=>{sportsCat=Array.isArray(d)?d:[];if(tab==='game'&&!S.game)render()}).catch(()=>{sportsCat=[]}).finally(()=>{sportsLoading=false})}
+function moreSportsHTML(){if(!sportsCat){loadSports();return '<p class="mut">Henter sportsgrene…</p>'}
+ const list=sportsCat.filter(x=>x&&x.id&&x.href&&String(x.href).startsWith('/kamp/ny?sport='));if(!list.length)return '<p class="mut">Sportsgrenene kunne ikke hentes. Se dem under <a href="/sport">Sportsgrene og regler</a>.</p>';
+ const groups=[...new Set(list.map(x=>x.group))];
+ return groups.map(g=>`<p class="msg">${esc(g)}</p><ul class="mslist">${list.filter(x=>x.group===g).map(x=>`<li><a href="${esc(x.href)}" title="${esc(x.blurb||'')}"><span aria-hidden="true">${esc(x.emoji||'')}</span>${esc(x.name)}</a></li>`).join('')}</ul>`).join('')}
 function sideTeams(){return setup.teams&&setup.teams.length?setup.teams.filter(id=>T(id)&&T(id).pids.length):null}
 function groupSides(){const tm=sideTeams();if(tm)return tm.map(id=>T(id).pids.slice());const s=setup.sel;if(!setup.pairs)return s.map(x=>[x]);const o=[];for(let i=0;i<s.length;i+=2)o.push(s.slice(i,i+2));return o}
 
@@ -1138,6 +1152,10 @@ function viewSetup(){
     ${sides.length?`<ol class="order">${sides.map((pids,i)=>`<li><span class="ord">${i+1}</span>${ordItem(pids,i)}<button data-act="mv" data-v="${i}" data-d="-1" aria-label="Flyt op">↑</button><button data-act="mv" data-v="${i}" data-d="1" aria-label="Flyt ned">↓</button></li>`).join('')}</ol>`:`<p class="mut">Vælg mindst to spillere til venstre.</p>`}
     <div class="stack"><button class="btn pri big" data-act="start">Start kamp</button>
     ${last.length>=2?`<button class="btn" data-act="last">Sidste hold igen: ${esc(last.map(id=>P(id).first).join(', '))}</button>`:''}</div>
+  </section>
+  <section class="card moresports" aria-labelledby="mshead"><div class="ch"><h2 id="mshead">Flere sportsgrene</h2><span class="mut">Fodbold, tennis, kampsport, løb og mere</span></div>
+    <p class="mut">Billard og dart køres her på tavlen. De andre sportsgrene har hver deres regelsæt og pointberegning i BanditBoards kampmotor – vælg en sport for at oprette kampen med sporten valgt. Jeres spil her på tavlen bliver gemt.</p>
+    ${moreSportsHTML()}
   </section></div>`}
 
 function ordItem(pids,i){const tid=(sideTeams()||[])[i];return tid?`${tAvatar(T(tid))}<b>${esc(T(tid).name)}</b>`:`${avatar(P(pids[0]))}<b>${esc(pids.map(id=>fullName(P(id))).join(' & '))}</b>`}
@@ -2831,7 +2849,7 @@ document.addEventListener('pointerup',e=>{
 document.addEventListener('click',e=>{if(menuOpen&&!e.target.closest('.bbmenu'))setMenu(false)},true);
 document.addEventListener('keydown',e=>{const inMenu=e.target.closest&&e.target.closest('.bbmenu');if(menuOpen&&e.key==='Escape'){e.preventDefault();e.stopPropagation();setMenu(false,'btn');return}
  if(!inMenu)return;
- if(e.key==='ArrowDown'||e.key==='ArrowUp'){const items=[...document.querySelectorAll('#bbmenulist button')];if(!items.length)return;e.preventDefault();if(!menuOpen){setMenu(true,'item');return}const i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus()}
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){const items=[...document.querySelectorAll('#bbmenulist button, #bbmenulist a')];if(!items.length)return;e.preventDefault();if(!menuOpen){setMenu(true,'item');return}const i=items.indexOf(document.activeElement);items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus()}
  /* Enter/mellemrum aktiverer knappen som normalt, men må ikke nå tavlens tastaturgenveje (point). */
  if(e.key==='Enter'||e.key===' ')e.stopPropagation()},true);
 document.addEventListener('click',e=>{if(e.target.id==='modal')return closeModal();const b=e.target.closest('[data-act]');if(!b||b.disabled)return;act(b.dataset.act,b.dataset.v,b)});
