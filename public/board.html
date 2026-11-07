@@ -2934,8 +2934,8 @@ function sdButtons(){return [...document.querySelectorAll('[data-act]')].filter(
 function sdCatalog(){
   let saved=[];try{saved=JSON.parse(localStorage.getItem(SD_CATKEY)||'[]')}catch(e){}
   const map=new Map(saved.filter(x=>x&&x.a).map(x=>[x.a+'|'+(x.v||''),x]));
-  sdButtons().forEach(b=>{const a=b.dataset.act,v=b.dataset.v||'';if(!sdAllowed(a))return;const label=sdLabel(b);if(!label)return;map.set(a+'|'+v,{a,v,label,group:sdGroup(b),mode:S.game?S.game.mode:''})});
-  const list=[{a:'__next',v:'',label:'Næste / Serie slut (mellemrum)',group:'Genveje'},{a:'__undo',v:'',label:'Fortryd (Esc)',group:'Genveje'},...[...map.values()].filter(x=>x.a!=='__next'&&x.a!=='__undo')].slice(0,300);
+  sdButtons().forEach(b=>{const a=b.dataset.act,v=(b.dataset.v||'')+(b.dataset.kind?'#'+b.dataset.kind:'');if(!sdAllowed(a))return;const label=sdLabel(b);if(!label)return;if(a==='sktgt')return;map.set(a+'|'+v,{a,v,label,group:sdGroup(b),mode:S.game?S.game.mode:''})});
+  const list=[{a:'__next',v:'',label:'Næste / Serie slut (mellemrum)',group:'Genveje'},{a:'__undo',v:'',label:'Fortryd (Esc)',group:'Genveje'},{a:'__skt',v:'1',label:'Minuspoint: vælg spiller 1',group:'Genveje'},{a:'__skt',v:'2',label:'Minuspoint: vælg spiller 2',group:'Genveje'},...[...map.values()].filter(x=>x.a!=='__next'&&x.a!=='__undo')].slice(0,300);
   try{localStorage.setItem(SD_CATKEY,JSON.stringify(list.filter(x=>!x.a.startsWith('__'))))}catch(e){}
   return list}
 function sdStatus(){
@@ -2944,12 +2944,13 @@ function sdStatus(){
   return {table:t,game:true,mode:g.mode||'',over:!!g.over,paused:!!g.paused,turn:g.turn??0,round:g.round||1,target:g.target||null,
     active:(g.active&&g.active.playerName)||'',sides:(g.sides||[]).map(x=>({name:(()=>{try{return sideName(x)}catch(e){return ''}})(),score:x.score??0,on:!g.over&&g.sides[g.turn]===x}))}}
 function sdRun(c){
-  const a=String(c.act||''),v=String(c.v||'');
+  const a=String(c.act||''),vv=String(c.v||''),hk=vv.indexOf('#'),v=hk<0?vv:vv.slice(0,hk),kind=hk<0?null:vv.slice(hk+1);
   if(!$('#modal').hidden)return {ok:false,message:'Et vindue er åbent på scoreboardet – luk det først.'};
   if(a==='__next'){if(!S.game||tab!=='game')return {ok:false,message:'Ingen kamp i gang.'};if(S.game.paused&&!S.game.over)return {ok:false,message:'Kampen er på pause.'};commit();return {ok:true,message:'Næste'}}
   if(a==='__undo'){if(!S.game)return {ok:false,message:'Ingen kamp i gang.'};S.game.mode==='point'?undoPoint(S.game):doUndo();return {ok:true,message:'Fortryd'}}
+  if(a==='__skt'){const t=sdButtons().filter(x=>x.dataset.act==='sktgt');const b=t[(parseInt(v,10)||1)-1];if(!b)return {ok:false,message:'Ingen spiller '+v+' at give minuspoint.'};b.click();return {ok:true,message:'Minuspoint: '+sdLabel(b)}}
   if(!sdAllowed(a))return {ok:false,message:'Den knap kan ikke styres fra Stream Deck.'};
-  const b=sdButtons().find(x=>x.dataset.act===a&&(x.dataset.v||'')===v);
+  const b=sdButtons().find(x=>x.dataset.act===a&&(x.dataset.v||'')===v&&(kind===null||(x.dataset.kind||'')===kind));
   if(!b)return {ok:false,message:'Knappen findes ikke på scoreboardet lige nu.'};
   if(b.disabled)return {ok:false,message:'Knappen er slået fra lige nu.'};
   b.click();return {ok:true,message:sdLabel(b)}}
