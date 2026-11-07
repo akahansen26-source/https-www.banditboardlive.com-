@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#070D1F">
+<meta name="theme-color" content="#12161F">
 <title>BanditBoard Live</title>
 <meta name="application-name" content="BanditBoard Live">
 <meta name="apple-mobile-web-app-title" content="BanditBoard Live">
@@ -25,8 +25,14 @@
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-:root[data-scheme="bandit"]{--a1:#19C3FF;--a2:#FF7A1A;--a3:#2F6BFF;--on-a1:#03121C}
-:root[data-scheme="bandit"]:not([data-mode="light"]){--bg:#070D1F;--panel:#0E1830;--panel2:#14223F;--deep:#050A17;--line:#1F3057}
+:root[data-scheme="bandit"]{--a1:#FF5A1F;--a2:#00D4FF;--a3:#3B82F6;--on-a1:#12161F}
+/* Arena Live (standard): kul-grå, blågrå kort, orange handling/valgt, cyan live/fremhævning. */
+:root[data-scheme="bandit"]:not([data-mode="light"]){--bg:#12161F;--panel:#1A2332;--panel2:#1F2938;--deep:#0E1219;--line:#2A3547;--text:#E8E8E8;--muted:#A3AFBF;--ok:#3DDC84;--danger:#FF6B6B}
+/* Lyst Arena: orange er for lyst som tekst på hvidt, så valgt-farven gøres mørkere. */
+:root[data-scheme="bandit"][data-mode="light"]{--a1:#B23F12;--a2:#0077A3;--on-a1:#FFFFFF}
+/* Den tidligere Bandit-navy kan stadig vælges. */
+:root[data-scheme="navy"]{--a1:#19C3FF;--a2:#FF7A1A;--a3:#2F6BFF;--on-a1:#03121C}
+:root[data-scheme="navy"]:not([data-mode="light"]){--bg:#070D1F;--panel:#0E1830;--panel2:#14223F;--deep:#050A17;--line:#1F3057}
 :root[data-scheme="ember"]{--a1:#FF6B35;--a2:#F59E0B;--a3:#B91C1C;--on-a1:#1F0A02}
 :root[data-scheme="neon"]{--a1:#7B61FF;--a2:#22D3EE;--a3:#E879F9;--on-a1:#FFFFFF}
 :root[data-mode="light"]{--bg:#E9EEF6;--panel:#FFFFFF;--panel2:#F1F4FA;--deep:#FFFFFF;--line:#D3DAE6;--text:#0B0F19;--muted:#4B5A70}
@@ -155,7 +161,7 @@ input[type=number]{width:110px}
 @media (max-width:980px){.desk,.desk.noside,.desk.nomain{grid-template-columns:1fr}.z-side,.z-main,.z-top,.z-bottom{grid-column:1}}
 body.arrange .mod{position:relative;outline:2px dashed rgba(25,195,255,.75);outline-offset:4px;border-radius:16px;touch-action:none}
 body.arrange .mod.lifting{outline-color:#fff;opacity:.72}
-body.arrange .mod:before{content:attr(data-label);position:absolute;z-index:4;top:-12px;left:12px;background:#19C3FF;color:#041018;font:800 12px/1.4 var(--disp);letter-spacing:.04em;padding:2px 8px;border-radius:8px}
+body.arrange .mod:before{content:attr(data-label);position:absolute;z-index:4;top:-12px;left:12px;background:var(--a1);color:var(--on-a1);font:800 12px/1.4 var(--disp);letter-spacing:.04em;padding:2px 8px;border-radius:8px}
 .arrangebar{position:sticky;bottom:12px;z-index:40;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding:12px;border-radius:16px;background:#07111c;border:1px solid rgba(25,195,255,.45);box-shadow:0 16px 40px -24px #000}
 .arrangebar b{font:800 18px var(--disp)}
 .arrangebar span{color:var(--muted);font-size:13px}
@@ -1262,7 +1268,7 @@ function viewSettings(){const st=S.settings,seg=(k,o)=>`<div class="seg">${o.map
 const base=baseURL();
 return `<h1>Indstillinger</h1><div class="sgrid">
 <section class="card"><h2>Udseende</h2>
-<div class="fldrow"><span>Farvetema</span>${seg('scheme',[['bandit','Bandit'],['ocean','Ocean'],['ember','Ember'],['neon','Neon']])}</div>
+<div class="fldrow"><span>Farvetema</span>${seg('scheme',[['bandit','Arena Live'],['navy','Navy'],['ocean','Ocean'],['ember','Ember'],['neon','Neon']])}</div>
 <div class="fldrow"><span>Lys/mørk</span>${seg('mode',[['dark','Mørk'],['light','Lys']])}</div>
 <div class="fldrow"><span>Tavle-font</span>${seg('font',[['classic','Klassisk'],['modern','Moderne']])}</div>
 <label class="fld"><span>Sted</span><input data-set="venue" value="${esc(st.venue)}"></label>
@@ -2940,7 +2946,7 @@ function paintShell(){
   else if(isRemoteMode()){document.body.className='remote';const rc=MODE.split('/')[1];if(rc){setRemoteCode(decodeURIComponent(rc).toUpperCase());history.replaceState(null,'','#remote')}}
 }
 function boardDenied(text){
-  return '<main style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px"><div><p style="letter-spacing:.18em;color:#EF4444;font-weight:800">ACCESS DENIED</p><h1>Du har ikke rettigheder til at tilgå scoreboardet.</h1><p class="mut">'+text+'</p><p style="margin-top:16px"><a href="/konto" style="color:#19C3FF">Til kontoen</a></p></div></main>';
+  return '<main style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px"><div><p style="letter-spacing:.18em;color:#EF4444;font-weight:800">ACCESS DENIED</p><h1>Du har ikke rettigheder til at tilgå scoreboardet.</h1><p class="mut">'+text+'</p><p style="margin-top:16px"><a href="/konto" style="color:#00D4FF">Til kontoen</a></p></div></main>';
 }
 function boardBlockReason(){
   const p=window.__bbPerms;
@@ -3019,7 +3025,7 @@ async function startApp(){
   if(!me||!me.id){location.replace('/login?next='+encodeURIComponent(location.pathname+location.hash));return}
   if(me.active===false || (me.accountStatus && me.accountStatus!=='approved')){
     const wait=me.accountStatus==='pending';
-    document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px"><div><img src="/branding/logo-nav.png" alt="BanditBoard Live" style="height:72px;width:auto;margin:0 auto 16px"><h1>'+(wait?'Afventer godkendelse':'Adgangen er lukket')+'</h1><p class="mut">'+(wait?'En administrator skal godkende kontoen, før scoreboardet kan åbnes.':'Kontakt BanditBoard, hvis scoreboardet skal åbnes igen.')+'</p><p style="margin-top:16px"><a href="/live" style="color:#19C3FF">Se live</a></p></div></main>';
+    document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px"><div><img src="/branding/logo-nav.png" alt="BanditBoard Live" style="height:72px;width:auto;margin:0 auto 16px"><h1>'+(wait?'Afventer godkendelse':'Adgangen er lukket')+'</h1><p class="mut">'+(wait?'En administrator skal godkende kontoen, før scoreboardet kan åbnes.':'Kontakt BanditBoard, hvis scoreboardet skal åbnes igen.')+'</p><p style="margin-top:16px"><a href="/live" style="color:#00D4FF">Se live</a></p></div></main>';
     return;
   }
   window.__bbPerms=Array.isArray(me.permissions)?me.permissions:[];

@@ -20,21 +20,21 @@
   --radius-card: 1rem;
 }
 
-/* Scoreboard/TV beholder det mørke, høj-kontrast udtryk. */
 .theme-dark {
-  --color-bg: #070d1f;
-  --color-surface: #0e1830;
-  --color-surface-2: #14223f;
-  --color-deep: #050a17;
+  /* Scoreboard/TV-flader i Arena Live: samme kul-grå, orange live og cyan fremhævning. */
+  --color-bg: #12161f;
+  --color-surface: #1a2332;
+  --color-surface-2: #1f2938;
+  --color-deep: #0e1219;
+  --color-fg: #e8e8e8;
   --color-heading: #ffffff;
-  --color-fg: #e8eef7;
-  --color-muted: #94a3b8;
-  --color-primary: #19c3ff;
-  --color-primary-fg: #03121c;
-  --color-accent: #ff7a1a;
-  --color-line: #1f3057;
-  --color-danger: #ef4444;
-  --color-ok: #22c55e;
+  --color-muted: #a3afbf;
+  --color-primary: #ff5a1f;
+  --color-primary-fg: #12161f;
+  --color-accent: #00d4ff;
+  --color-line: #2a3547;
+  --color-danger: #ff6b6b;
+  --color-ok: #3ddc84;
   background: var(--color-bg);
   color: var(--color-fg);
 }

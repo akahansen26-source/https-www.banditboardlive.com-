@@ -39,9 +39,46 @@ test("tekst og knapper har mindst 4.5:1 kontrast (WCAG AA)", () => {
   assert.ok(ratio(token(site, "primary-fg"), token(site, "primary")) >= 4.5, "tekst på orange knap");
 });
 
-test("scoreboard/TV-temaet er uændret", () => {
+test("scoreboard/TV-fladerne (.theme-dark) bruger også Arena Live", () => {
   const tv = block(".theme-dark {");
-  assert.equal(token(tv, "bg"), "#070d1f");
-  assert.equal(token(tv, "primary"), "#19c3ff");
-  assert.equal(token(tv, "accent"), "#ff7a1a");
+  for (const key of ["bg", "surface", "primary", "accent", "fg", "muted", "line"]) assert.equal(token(tv, key), token(site, key), key);
+});
+
+const board = readFileSync(new URL("../../../public/board.html", import.meta.url), "utf8");
+const rule = (selector: string) => {
+  const at = board.indexOf(selector + "{");
+  assert.ok(at >= 0, `mangler ${selector}`);
+  return board.slice(at, board.indexOf("}", at));
+};
+const v = (src: string, key: string) => {
+  const m = new RegExp(`--${key}:(#[0-9A-Fa-f]{6})`).exec(src);
+  assert.ok(m, `mangler --${key}`);
+  return m[1].toLowerCase();
+};
+
+test("scoreboard-appen (board.html) har Arena Live som standardtema", () => {
+  assert.match(board, /<html[^>]*data-scheme="bandit"/);
+  assert.match(board, /<meta name="theme-color" content="#12161F">/);
+  const accents = rule(':root[data-scheme="bandit"]');
+  const dark = rule(':root[data-scheme="bandit"]:not([data-mode="light"])');
+  assert.equal(v(accents, "a1"), "#ff5a1f");
+  assert.equal(v(accents, "a2"), "#00d4ff");
+  assert.equal(v(dark, "bg"), "#12161f");
+  assert.equal(v(dark, "panel"), "#1a2332");
+  assert.ok(ratio(v(accents, "on-a1"), v(accents, "a1")) >= 4.5, "tekst på valgt/handling");
+  for (const bg of ["bg", "panel", "panel2"]) {
+    for (const fg of ["text", "muted", "danger", "ok"]) assert.ok(ratio(v(dark, fg), v(dark, bg)) >= 4.5, `${fg} på ${bg}`);
+    assert.ok(ratio(v(accents, "a2"), v(dark, bg)) >= 4.5, `cyan på ${bg}`);
+  }
+  const light = rule(':root[data-scheme="bandit"][data-mode="light"]');
+  assert.ok(ratio(v(light, "a1"), "#ffffff") >= 4.5, "lyst tema: valgt-farve på hvidt");
+  assert.ok(ratio(v(light, "on-a1"), v(light, "a1")) >= 4.5, "lyst tema: tekst på knap");
+});
+
+test("brugerens øvrige farvetemaer og den gamle navy kan stadig vælges", () => {
+  assert.match(board, /\['bandit','Arena Live'\],\['navy','Navy'\],\['ocean','Ocean'\],\['ember','Ember'\],\['neon','Neon'\]/);
+  assert.equal(v(rule(':root[data-scheme="navy"]:not([data-mode="light"])'), "bg"), "#070d1f");
+  assert.equal(v(rule(':root[data-scheme="ember"]'), "a1"), "#ff6b35");
+  assert.equal(v(rule(':root[data-scheme="neon"]'), "a1"), "#7b61ff");
+  assert.match(board, /scheme:'bandit'/, "standardindstillingen er uændret, så gemte valg ikke nulstilles");
 });

@@ -26,11 +26,11 @@ function initials(name: string) {
 
 function Face({ side }: { side: Side }) {
   return (
-    <span className={`grid size-16 shrink-0 place-items-center overflow-hidden rounded-full p-1 sm:size-20 ${side.playing ? "bg-gradient-to-br from-[#f6cfa9] to-[#b8734a] shadow-[0_0_0_3px_rgba(255,214,176,.85)]" : "bg-[#243556]"}`}>
+    <span className={`grid size-16 shrink-0 place-items-center overflow-hidden rounded-full p-1 sm:size-20 ${side.playing ? "bg-gradient-to-br from-[#f6cfa9] to-[#b8734a] shadow-[0_0_0_3px_rgba(255,214,176,.85)]" : "bg-[#2a3547]"}`}>
       {side.photo ? (
         <img src={side.photo} alt="" className="size-full rounded-full object-cover" />
       ) : (
-        <span className="grid size-full place-items-center rounded-full bg-[#10203b] font-display text-xl text-[#e7b48c]">{initials(side.name)}</span>
+        <span className="grid size-full place-items-center rounded-full bg-[#12161f] font-display text-xl text-[#e7b48c]">{initials(side.name)}</span>
       )}
     </span>
   );
@@ -47,7 +47,7 @@ function Player({ side, align }: { side: Side; align: "left" | "right" }) {
       <Face side={side} />
       <div className="min-w-0">
         <p className="font-display text-2xl uppercase leading-none text-white sm:text-4xl">{side.name}</p>
-        <p className="mt-1 text-sm text-[#d6e0f0]">{side.club || (side.playing ? "Spiller nu" : " ")}</p>
+        <p className="mt-1 text-sm text-[#e8e8e8]">{side.club || (side.playing ? "Spiller nu" : " ")}</p>
       </div>
     </div>
   );
@@ -55,16 +55,16 @@ function Player({ side, align }: { side: Side; align: "left" | "right" }) {
 
 function Seat({ side }: { side: Side }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-xl bg-[#16284a] px-3 py-3">
+    <div className="flex min-w-0 items-center gap-3 rounded-xl bg-[#2a3547] px-3 py-3">
       {side.playing ? (
         <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#1f8a4c] font-display text-lg text-white" title="Spiller nu">S</span>
       ) : null}
       <Face side={side} />
       <div className="min-w-0 flex-1">
         <p className="break-words font-display text-xl uppercase leading-tight text-white sm:text-2xl">{side.name}</p>
-        <p className="mt-1 truncate text-sm text-[#d6e0f0]">{side.club || (side.playing ? "Spiller nu" : "")}</p>
+        <p className="mt-1 truncate text-sm text-[#e8e8e8]">{side.club || (side.playing ? "Spiller nu" : "")}</p>
       </div>
-      <div className={`grid h-16 w-14 shrink-0 place-items-center rounded-xl border-2 bg-gradient-to-b from-[#0f1c33] to-[#070f1e] ${side.playing ? "border-[#f3c9a2] shadow-[0_0_18px_rgba(243,190,140,.45)]" : "border-[#b8734a]"}`}>
+      <div className={`grid h-16 w-14 shrink-0 place-items-center rounded-xl border-2 bg-gradient-to-b from-[#1f2938] to-[#12161f] ${side.playing ? "border-[#f3c9a2] shadow-[0_0_18px_rgba(243,190,140,.45)]" : "border-[#b8734a]"}`}>
         <span className="bg-gradient-to-b from-[#ffe3ca] to-[#9a5a34] bg-clip-text font-display text-4xl text-transparent">{side.score}</span>
       </div>
     </div>
@@ -73,7 +73,7 @@ function Seat({ side }: { side: Side }) {
 
 function Score({ value, on }: { value: number; on: boolean }) {
   return (
-    <div className={`grid h-20 w-16 shrink-0 place-items-center rounded-xl border-2 bg-gradient-to-b from-[#0f1c33] to-[#070f1e] sm:h-24 sm:w-20 ${on ? "border-[#f3c9a2] shadow-[0_0_18px_rgba(243,190,140,.45)]" : "border-[#b8734a]"}`}>
+    <div className={`grid h-20 w-16 shrink-0 place-items-center rounded-xl border-2 bg-gradient-to-b from-[#1f2938] to-[#12161f] sm:h-24 sm:w-20 ${on ? "border-[#f3c9a2] shadow-[0_0_18px_rgba(243,190,140,.45)]" : "border-[#b8734a]"}`}>
       <span className="bg-gradient-to-b from-[#ffe3ca] to-[#9a5a34] bg-clip-text font-display text-5xl text-transparent sm:text-6xl">{value}</span>
     </div>
   );
@@ -83,8 +83,8 @@ function MatchBoard({ match }: { match: Match }) {
   const [left, right] = match.sides;
   const many = match.sides.length > 2;
   return (
-    <article className="theme-dark overflow-hidden rounded-2xl border border-[#e7b48c]/35 bg-[#0c172d] shadow-[0_18px_50px_-28px_rgba(0,0,0,.8)]">
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-[#10182a] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#d6e0f0]">
+    <article className="theme-dark overflow-hidden rounded-2xl border border-[#e7b48c]/35 bg-[#1a2332] shadow-[0_18px_50px_-28px_rgba(0,0,0,.8)]">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-[#12161f] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#e8e8e8]">
         <span>{match.tour}</span>
         <span className="text-[#b8734a]">·</span>
         <span>{match.table || "Bord"}</span>
@@ -120,26 +120,26 @@ function MatchBoard({ match }: { match: Match }) {
           ))}
         </div>
       ) : null}
-      <div className="border-t border-white/10 bg-[#09111f] px-4 py-3">
+      <div className="border-t border-white/10 bg-[#0e1219] px-4 py-3">
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <p className="font-display text-xl uppercase text-white">Point-historik</p>
-          <p className="text-xs text-[#9aabc4]">{(match.history || []).length ? "Seneste slag" : "Ingen slag endnu"}</p>
+          <p className="text-xs text-[#a3afbf]">{(match.history || []).length ? "Seneste slag" : "Ingen slag endnu"}</p>
         </div>
         {(match.history || []).length ? (
           <ol className="grid gap-1.5">
             {(match.history || []).map((point, index) => (
               <li key={`${point.time}-${point.name}-${index}`} className={`grid grid-cols-[4.5rem_1fr_auto] items-center gap-3 rounded-lg px-2 py-1.5 ${point.tone === "undo" ? "opacity-55" : "bg-white/[0.03]"}`}>
-                <span className={`font-display text-2xl ${point.tone === "minus" ? "text-[#ff8d8d]" : point.tone === "undo" ? "text-[#9aabc4]" : "text-[#7dffa8]"}`}>{point.delta}</span>
+                <span className={`font-display text-2xl ${point.tone === "minus" ? "text-[#ff8d8d]" : point.tone === "undo" ? "text-[#a3afbf]" : "text-[#7dffa8]"}`}>{point.delta}</span>
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold text-white">{point.name}</span>
-                  <span className="block text-xs text-[#9aabc4]">{point.detail}</span>
+                  <span className="block text-xs text-[#a3afbf]">{point.detail}</span>
                 </span>
-                <time className="text-xs text-[#9aabc4]">{point.time}</time>
+                <time className="text-xs text-[#a3afbf]">{point.time}</time>
               </li>
             ))}
           </ol>
         ) : (
-          <p className="text-sm text-[#9aabc4]">Historikken kommer frem, når det første stød er registreret.</p>
+          <p className="text-sm text-[#a3afbf]">Historikken kommer frem, når det første stød er registreret.</p>
         )}
       </div>
     </article>
