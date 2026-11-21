@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { fetchMatch, type MatchView } from "@/lib/sports/api";
 import { sportById } from "@/lib/sports/engine";
 import { ClockView, ScoreView } from "@/components/sports/match-ui";
+import { markActive, pollAllowed } from "@/lib/idle";
 
 type Search = { obs?: number; k?: string };
 
@@ -19,9 +20,11 @@ function LiveBoard() {
   const [err, setErr] = useState("");
   useEffect(() => {
     let stop = false;
-    const tick = () => fetchMatch(id, k).then((x) => { if (!stop) { setM(x); setErr(""); } }).catch((e: Error) => !stop && setErr(e.message));
+    let lastSig = "";
+    const tick = () => fetchMatch(id, k).then((x) => { if (!stop) { const sig = JSON.stringify(x.events.length) + x.status; if (sig !== lastSig) { lastSig = sig; markActive(); } setM(x); setErr(""); } }).catch((e: Error) => !stop && setErr(e.message));
     void tick();
-    const t = setInterval(tick, 2000);
+    const gate = { t: 0 };
+    const t = setInterval(() => { if (pollAllowed(gate, true)) void tick(); }, 2000);
     return () => { stop = true; clearInterval(t); };
   }, [id, k]);
   useEffect(() => {

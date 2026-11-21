@@ -48,7 +48,7 @@ export const Route = createFileRoute("/api/board/state")({
         const spiller = url.searchParams.get("spiller");
         if (spiller) {
           try {
-            return new Response(JSON.stringify(await readBoardJoin(spiller)), {
+            return new Response(JSON.stringify(await readBoardJoin(spiller, url.searchParams.get("since"))), {
               status: 200,
               headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
             });
@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/board/state")({
         const obs = url.searchParams.get("obs");
         if (obs) {
           try {
-            const data = await readBoardByOverlayKey(obs);
+            const data = await readBoardByOverlayKey(obs, url.searchParams.get("since"));
             return new Response(JSON.stringify(data), {
               status: 200,
               headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
@@ -71,7 +71,7 @@ export const Route = createFileRoute("/api/board/state")({
         const user = await getSessionUser(bearer(request));
         if (!user) return json({ error: "Unauthorized" }, 401);
         try {
-          return json(await readBoardState(user.id));
+          return json(await readBoardState(user.id, url.searchParams.get("since")));
         } catch (error) {
           return denied(error);
         }

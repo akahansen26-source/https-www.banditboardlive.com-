@@ -75,26 +75,27 @@ export async function userByToken(token: string | null | undefined): Promise<str
 
 type BoardStatus = { online: boolean; seenAt: string | null; statusAt: string | null; catalog: unknown[]; status: Record<string, unknown> };
 
-export async function readStatus(userId: string, since?: string | null, waitMs = 0): Promise<BoardStatus> {
+export async function readStatus(userId: string, since?: string | null, waitMs = 0, withCatalog = true): Promise<BoardStatus> {
   const sql = await getSql();
   const end = Date.now() + Math.min(Math.max(waitMs, 0), 8000);
-  for (;;) {
-    const rows = await sql.query<{ catalog: string; status: string; status_at: string | null; seen_at: string | null; online: boolean }>(
-      `select catalog, status, status_at::text as status_at, seen_at::text as seen_at,
-              coalesce(seen_at > now() - interval '20 seconds', false) as online
-       from board_remote where user_id = $1`,
-      [userId],
-    );
-    const r = rows[0];
-    if (!r || !since || r.status_at !== since || Date.now() >= end) {
-      let catalog: unknown[] = [];
-      let status: Record<string, unknown> = {};
-      try { catalog = JSON.parse(r?.catalog ?? "[]"); } catch { /* tom */ }
-      try { status = JSON.parse(r?.status ?? "{}"); } catch { /* tom */ }
-      return { online: Boolean(r?.online), seenAt: r?.seen_at ?? null, statusAt: r?.status_at ?? null, catalog, status };
-    }
-    await sleep(300);
+  // vent på ændringer ved kun at læse tidsstemplet (lille) – selve status/knapliste hentes én gang til sidst
+  while (since && Date.now() < end) {
+    const head = await sql.query<{ status_at: string | null }>(`select status_at::text as status_at from board_remote where user_id = $1`, [userId]);
+    if (!head[0] || head[0].status_at !== since) break;
+    await sleep(1000);
   }
+  const rows = await sql.query<{ catalog: string | null; status: string; status_at: string | null; seen_at: string | null; online: boolean }>(
+    `select ${withCatalog ? "catalog" : "null as catalog"}, status, status_at::text as status_at, seen_at::text as seen_at,
+            coalesce(seen_at > now() - interval '20 seconds', false) as online
+     from board_remote where user_id = $1`,
+    [userId],
+  );
+  const r = rows[0];
+  let catalog: unknown[] = [];
+  let status: Record<string, unknown> = {};
+  try { catalog = JSON.parse(r?.catalog ?? "[]"); } catch { /* tom */ }
+  try { status = JSON.parse(r?.status ?? "{}"); } catch { /* tom */ }
+  return { online: Boolean(r?.online), seenAt: r?.seen_at ?? null, statusAt: r?.status_at ?? null, catalog, status };
 }
 
 const ACT_RE = /^[a-zA-Z0-9_]{1,24}$/;
@@ -132,7 +133,7 @@ export async function sendCommand(userId: string, act: string, v: string, source
     id,
     done: false,
     ok: false,
-    message: online[0]?.online ? "Scoreboardet svarede ikke i tide." : "Scoreboardet er ikke åbent. Åbn scoreboardet på BanditBoard Live.",
+    message: online[0]?.online ? "Scoreboardet svarede ikke i tide." : "Scoreboardet er lukket eller hviler (ingen aktivitet i 30 min). Klik på scoreboardet for at vække det.",
   };
 }
 

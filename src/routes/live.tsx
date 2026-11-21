@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteShell } from "@/components/site-shell";
+import { markActive, pollAllowed } from "@/lib/idle";
 
 export const Route = createFileRoute("/live")({ component: LivePage });
 
@@ -159,15 +160,20 @@ function LivePage() {
         if (!response.ok) throw new Error("offline");
         const data = (await response.json()) as { matches?: Match[] };
         if (stop) return;
-        setMatches(Array.isArray(data.matches) ? data.matches : []);
+        const next = Array.isArray(data.matches) ? data.matches : [];
+        const sig = JSON.stringify(next);
+        if (sig !== lastSig) { lastSig = sig; markActive(); }
+        setMatches(next);
         setOffline(false);
         setSeenAt(new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }));
       } catch {
         if (!stop) setOffline(true);
       }
     }
+    let lastSig = "";
     void pull();
-    const timer = setInterval(() => void pull(), 3000);
+    const gate = { t: 0 };
+    const timer = setInterval(() => { if (pollAllowed(gate, true)) void pull(); }, 3000);
     return () => {
       stop = true;
       clearInterval(timer);
