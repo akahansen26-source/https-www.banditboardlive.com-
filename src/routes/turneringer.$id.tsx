@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/site-shell";
 import { addSportTournamentRound, deleteSportTournament, getSportTournament } from "@/lib/sports/api";
 import { sportById } from "@/lib/sports/engine";
 import { Badge, btnGhost, btnPrimary } from "@/components/sports/match-ui";
+import { pollAllowed } from "@/lib/idle";
 
 export const Route = createFileRoute("/turneringer/$id")({ component: TournamentPage });
 
@@ -21,7 +22,8 @@ function TournamentPage() {
   const load = useCallback(() => getSportTournament({ data: { id } }).then(setT).catch((e: Error) => setErr(e.message)), [id]);
   useEffect(() => {
     void load();
-    const i = setInterval(() => void load(), 8000);
+    const gate = { t: 0 };
+    const i = setInterval(() => { if (pollAllowed(gate, true)) void load(); }, 8000);
     return () => clearInterval(i);
   }, [load]);
 

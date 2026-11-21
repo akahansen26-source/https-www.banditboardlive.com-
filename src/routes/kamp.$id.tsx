@@ -5,6 +5,7 @@ import { approveSportMatch, deleteSportMatch, fetchMatch, getSportMatchHistory, 
 import { actionsFor, eventLabels, sportById } from "@/lib/sports/engine";
 import { ActionPanel, Badge, btnGhost, btnPrimary, EventLog, inputCls, ScoreView, type Submit } from "@/components/sports/match-ui";
 import type { MatchEvent } from "@/lib/sports/types";
+import { pollAllowed } from "@/lib/idle";
 
 export const Route = createFileRoute("/kamp/$id")({ component: MatchConsole });
 
@@ -27,7 +28,8 @@ function MatchConsole() {
   }, [id]);
   useEffect(() => {
     void load();
-    const t = setInterval(() => void load(), 3000);
+    const gate = { t: 0 };
+    const t = setInterval(() => { if (pollAllowed(gate)) void load(); }, 3000);
     return () => clearInterval(t);
   }, [load]);
 

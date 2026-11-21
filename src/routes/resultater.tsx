@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/site-shell";
 import { getPublicSports } from "@/lib/sports/api";
 import { SPORTS } from "@/lib/sports/catalog";
 import { Badge } from "@/components/sports/match-ui";
+import { pollAllowed } from "@/lib/idle";
 
 export const Route = createFileRoute("/resultater")({
   head: () => ({ meta: [{ title: "Resultater – BanditBoard Live" }, { name: "description", content: "Live-resultater, kampe og turneringsstillinger fra BanditBoard Live." }] }),
@@ -19,7 +20,8 @@ function Results() {
   useEffect(() => {
     const tick = () => getPublicSports().then(setD).catch((e: Error) => setErr(e.message));
     void tick();
-    const t = setInterval(tick, 10000);
+    const gate = { t: 0 };
+    const t = setInterval(() => { if (pollAllowed(gate, true)) void tick(); }, 10000);
     return () => clearInterval(t);
   }, []);
   const matches = (d?.matches ?? []).filter((m) => !sport || m.sportId === sport);

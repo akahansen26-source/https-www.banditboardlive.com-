@@ -6560,7 +6560,7 @@ function svg(body, border = "#1E293B") {
   return "data:image/svg+xml;charset=utf8," + encodeURIComponent(s);
 }
 function scoreImage(st, sideKey, online) {
-  if (!online) return svg(`<text x="72" y="64" font-family="Arial" font-size="20" font-weight="700" fill="#94A3B8" text-anchor="middle">Scoreboard</text><text x="72" y="92" font-family="Arial" font-size="20" font-weight="700" fill="#94A3B8" text-anchor="middle">ikke \xE5bent</text>`);
+  if (!online) return svg(`<text x="72" y="52" font-family="Arial" font-size="19" font-weight="700" fill="#94A3B8" text-anchor="middle">Scoreboard</text><text x="72" y="78" font-family="Arial" font-size="19" font-weight="700" fill="#94A3B8" text-anchor="middle">hviler</text><text x="72" y="110" font-family="Arial" font-size="15" fill="#22D3EE" text-anchor="middle">tryk for at tjekke</text>`);
   if (!st?.game || !st.sides?.length) return svg(`<text x="72" y="80" font-family="Arial" font-size="22" font-weight="700" fill="#94A3B8" text-anchor="middle">Ingen kamp</text>`);
   if (sideKey === "turn") {
     const name = fit2(st.active || st.sides.find((x) => x.on)?.name || "\u2013", 12);
@@ -6722,6 +6722,7 @@ function wanted() {
 }
 function kickPoll() {
   kick?.();
+  ensurePolling();
 }
 async function refresh(wait) {
   const since = wait && last?.statusAt ? `&since=${encodeURIComponent(last.statusAt)}` : "";
@@ -6739,6 +6740,7 @@ function ensurePolling() {
         fails = 0;
         await paintAll();
         await pushToPi();
+        if (!last?.online) break;
       } catch (e) {
         lastError = e.message;
         fails++;

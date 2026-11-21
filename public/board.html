@@ -2922,9 +2922,25 @@ else if(k==='Backspace'&&g.kpad==='num'){act('bk')}
 else if(k==='+'){act('plus')}});
 if(MODE==='tv')document.addEventListener('dblclick',()=>document.documentElement.requestFullscreen?.());
 
+/* ---------- hvile: når ingen bruger tavlen, holder den op med at spørge serveren ----------
+   Databasen må gerne sove, når der ikke spilles (ellers bruges hele månedens kvote op).
+   Aktivitet = klik/taster på tavlen, ændringer i kampen eller Stream Deck-tryk. */
+const IDLE={last:Date.now(),sleeping:false,AFTER:30*60000};
+function bbActive(){IDLE.last=Date.now();if(IDLE.sleeping){IDLE.sleeping=false;const b=document.getElementById('bbsleep');if(b)b.remove();try{pullCloud()}catch(e){}if(typeof sdOn!=='undefined'&&sdOn&&!sdLoopRunning)sdLoop()}}
+function bbIdle(){if(Date.now()-IDLE.last<IDLE.AFTER)return false;
+  if(!IDLE.sleeping){IDLE.sleeping=true;if(!document.getElementById('bbsleep')){const d=document.createElement('div');d.id='bbsleep';
+    d.style.cssText='position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;background:#0B1222;color:#E2E8F0;border:1px solid #22D3EE;border-radius:12px;padding:10px 16px;font:600 14px system-ui;box-shadow:0 8px 30px rgba(0,0,0,.5);cursor:pointer';
+    d.textContent=MODE?'Tavlen hviler – opdateres igen ved næste ændring':'💤 Scoreboardet hviler (ingen aktivitet i 30 min). Klik her eller hvor som helst for at fortsætte.';
+    d.onclick=()=>bbActive();if(!MODE||MODE==='tv')document.body.appendChild(d)}}
+  return true}
+['pointerdown','keydown','wheel','touchstart'].forEach(e=>addEventListener(e,bbActive,true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)bbActive()});
+/* passive visninger (TV/OBS) tjekker sjældent, mens de hviler: hvert 15. min den første time, derefter hver time */
+function bbSlowOk(state){const idle=Date.now()-IDLE.last;const gap=idle<IDLE.AFTER+3600000?15*60000:60*60000;if(Date.now()-(state.t||0)<gap)return false;state.t=Date.now();return true}
+
 /* ---------- automatisk opdatering: åbne tavler henter selv en ny version, når den er lagt ud ---------- */
-const BOARD_BUILD='2026-11-07-skaeve-2';
-function buildWatch(){setInterval(async()=>{try{
+const BOARD_BUILD='2026-11-21-hvile';
+function buildWatch(){setInterval(async()=>{try{if(IDLE.sleeping)return;
   const r=await fetch('/board.html?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;
   const m=/const BOARD_BUILD='([^']+)'/.exec(await r.text());if(!m||m[1]===BOARD_BUILD)return;
   const g=S&&S.game,busy=!$('#modal').hidden||(g&&(g.entry||(g.pending&&g.pending.length)))||scheduleCloud.pending;
@@ -2973,6 +2989,7 @@ function sdBody(extra){const st=JSON.stringify(sdStatus());const cat=JSON.string
 async function sdLoop(){
   if(sdLoopRunning)return;sdLoopRunning=true;let fails=0;
   try{while(sdOn){
+    if(bbIdle()&&!sdDone.length)break;
     const done=sdDone.splice(0);
     let r;
     try{r=await fetch('/api/board/streamdeck',{method:'POST',headers:bbHeaders(),credentials:'include',cache:'no-store',body:JSON.stringify(sdBody({done,wait:done.length?0:8000}))})}
@@ -2981,10 +2998,10 @@ async function sdLoop(){
     if(!r.ok){sdDone.unshift(...done);fails++;await sdSleep(Math.min(15000,1000*fails));continue}
     fails=0;
     const j=await r.json().catch(()=>({}));
-    for(const c of (j.commands||[])){let res;try{res=sdRun(c)}catch(e){res={ok:false,message:'Fejl: '+(e&&e.message||e)}}sdDone.push(Object.assign({id:c.id},res));if(!res.ok)toast('🎛 '+res.message)}
+    if((j.commands||[]).length)bbActive();for(const c of (j.commands||[])){let res;try{res=sdRun(c)}catch(e){res={ok:false,message:'Fejl: '+(e&&e.message||e)}}sdDone.push(Object.assign({id:c.id},res));if(!res.ok)toast('🎛 '+res.message)}
   }}finally{sdLoopRunning=false}}
 /* status (score, tur) sendes med det samme, når den ændrer sig – så tasterne på Stream Deck følger med */
-function sdWatch(){clearInterval(sdStatusT);sdStatusT=setInterval(()=>{if(!sdOn)return;const st=JSON.stringify(sdStatus());if(st===sdLastStatus)return;
+function sdWatch(){clearInterval(sdStatusT);sdStatusT=setInterval(()=>{if(!sdOn||IDLE.sleeping)return;const st=JSON.stringify(sdStatus());if(st===sdLastStatus)return;
   fetch('/api/board/streamdeck',{method:'POST',headers:bbHeaders(),credentials:'include',body:JSON.stringify(sdBody({wait:0,peek:true}))}).catch(()=>{sdLastStatus=''})},700)}
 function sdStart(){if(MODE||sdOn)return;sdOn=true;sdLoop();sdWatch()}
 async function sdBoot(){if(MODE)return;try{const r=await fetch('/api/board/streamdeck',{headers:bbHeaders(),credentials:'include',cache:'no-store'});if(!r.ok)return;sdInfo=await r.json();if(sdInfo.hasToken)sdStart()}catch(e){}}
@@ -3050,8 +3067,10 @@ async function pushCloud(){
   }catch(e){return false}
   finally{scheduleCloud.pending=false}
 }
+const cloudSlow={t:0};
 async function pullCloud(){
   if(scheduleCloud.pending||cloudQuiet||applying) return;
+  if(bbIdle()&&(!MODE||!bbSlowOk(cloudSlow))) return;
   try{
     const r=await fetch('/api/board/state',{headers:bbHeaders(),credentials:'include',cache:'no-store'});
     if(!r.ok) return;
@@ -3063,6 +3082,7 @@ async function pullCloud(){
     try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
     cloudRev=j.updatedAt;
     applying=false; cloudQuiet=false;
+    bbActive();
     render();
   }catch(e){applying=false; cloudQuiet=false}
 }
@@ -3115,7 +3135,7 @@ async function startApp(){
     try{
       window.__bbPullJoin=pullJoin;
       await pullJoin();
-      setInterval(()=>pullJoin().catch(()=>{}),3000);
+      setInterval(()=>{if(bbIdle())return;pullJoin().catch(()=>{})},3000);
       staticSite();
     }catch(e){
       document.body.innerHTML=boardDenied('Spiller-linket er ugyldigt. Hent et nyt under Konto eller via QR i scoreboardet.');
@@ -3135,14 +3155,14 @@ async function startApp(){
       if(!r.ok) throw new Error('bad');
       const j=await r.json();
       if(j.updatedAt&&j.updatedAt===obsRev) return;
-      obsRev=j.updatedAt||obsRev;
+      obsRev=j.updatedAt||obsRev;bbActive();
       if(j.state) S=bindTables(typeof j.state==='string'?JSON.parse(j.state):j.state);
       paintShell();
       render();
     };
     try{
       await pullObs();
-      setInterval(()=>pullObs().catch(()=>{}),2000);
+      const obsSlow={t:0};setInterval(()=>{if(bbIdle()&&!bbSlowOk(obsSlow))return;pullObs().catch(()=>{})},2000);
       staticSite();
     }catch(e){
       document.body.innerHTML=boardDenied('OBS-linket er ugyldigt. Hent et nyt under Konto.');

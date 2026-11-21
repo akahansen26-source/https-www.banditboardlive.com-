@@ -132,7 +132,7 @@ export async function sendCommand(userId: string, act: string, v: string, source
     id,
     done: false,
     ok: false,
-    message: online[0]?.online ? "Scoreboardet svarede ikke i tide." : "Scoreboardet er ikke åbent. Åbn scoreboardet på BanditBoard Live.",
+    message: online[0]?.online ? "Scoreboardet svarede ikke i tide." : "Scoreboardet er lukket eller hviler (ingen aktivitet i 30 min). Klik på scoreboardet for at vække det.",
   };
 }
 
