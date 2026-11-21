@@ -95,6 +95,12 @@ async function main() {
 }
 
 main().catch((err) => {
+  // Neon blokerer forbindelser, når månedens kvote er brugt. Så kan intet nås, men udgivelsen af en
+  // rettelse må ikke stoppes af det – kør migreringerne igen ved næste udgivelse, når kvoten er tilbage.
+  if (/exceeded the (?:[a-z ]+ )?quota/i.test(String(err?.message || err))) {
+    console.warn("[migrate] SPRINGER OVER: databasen har brugt sin kvote (Neon). Migreringer køres ved næste udgivelse.");
+    process.exit(0);
+  }
   console.error("[migrate] failed:", err?.message || err);
   // pg errors carry the context needed to debug a bad SQL file.
   for (const key of ["code", "detail", "hint", "position", "where"]) {

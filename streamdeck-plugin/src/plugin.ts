@@ -236,7 +236,9 @@ function kickPoll() {
 }
 async function refresh(wait: number) {
   const since = wait && last?.statusAt ? `&since=${encodeURIComponent(last.statusAt)}` : "";
-  last = await api<Remote>(`/api/streamdeck?status=1&wait=${wait}${since}`, {}, wait + 10000);
+  const prevCatalog = last?.catalog ?? [];
+  last = await api<Remote>(`/api/streamdeck?status=1&wait=${wait}${since}${piOpen ? "" : "&catalog=0"}`, {}, wait + 10000);
+  if (!piOpen && !last.catalog?.length) last.catalog = prevCatalog;
   lastError = "";
 }
 function ensurePolling() {

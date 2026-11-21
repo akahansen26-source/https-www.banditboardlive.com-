@@ -481,14 +481,32 @@ function publicHistory(game: Record<string, unknown>): PublicPoint[] {
     });
 }
 
+/** Cache pr. server-instans: hent kun tavler, der er ændret siden sidst (sparer databasens dataoverførsel). */
+const publicCache = new Map<string, { key: string; matches: PublicMatch[] }>();
+
 export async function listPublicMatches(): Promise<PublicMatch[]> {
   const sql = await getSql();
-  const rows = await sql.query<{ venue_name: string; state: string | null; updated_at: string | null }>(
-    `select p.venue_name, b.state, b.updated_at::text as updated_at
+  const heads = await sql.query<{ user_id: string; venue_name: string; updated_at: string | null }>(
+    `select p.user_id, p.venue_name, b.updated_at::text as updated_at
      from profiles p
      left join board_state b on b.user_id = p.user_id
      where p.public_live = true and p.active = true and p.account_status = 'approved'`,
   );
+  const stale = heads.filter((h) => publicCache.get(h.user_id)?.key !== `${h.updated_at}|${h.venue_name}`).map((h) => h.user_id);
+  if (stale.length) {
+    const states = await sql.query<{ user_id: string; state: string | null }>(`select user_id, state from board_state where user_id = any($1::text[])`, [stale]);
+    const byUser = new Map(states.map((r) => [r.user_id, r.state]));
+    for (const h of heads) {
+      if (!stale.includes(h.user_id)) continue;
+      publicCache.set(h.user_id, { key: `${h.updated_at}|${h.venue_name}`, matches: buildPublicMatches([{ venue_name: h.venue_name, state: byUser.get(h.user_id) ?? null, updated_at: h.updated_at }]) });
+    }
+  }
+  const live = new Set(heads.map((h) => h.user_id));
+  for (const id of [...publicCache.keys()]) if (!live.has(id)) publicCache.delete(id);
+  return heads.flatMap((h) => publicCache.get(h.user_id)?.matches ?? []);
+}
+
+function buildPublicMatches(rows: { venue_name: string; state: string | null; updated_at: string | null }[]): PublicMatch[] {
   const matches: PublicMatch[] = [];
   for (const row of rows) {
     const venue = (row.venue_name || "Klub").slice(0, 80);
@@ -651,16 +669,23 @@ export async function writeSettings(adminId: string, input: SiteSettings): Promi
   return readSettings();
 }
 
-export async function readBoardState(userId: string): Promise<{ state: string | null; updatedAt: string | null }> {
+/**
+ * Tavlens data. Med `since` (sidste kendte updatedAt) sendes selve tavlen kun, når den er ændret –
+ * ellers kun tidsstemplet. Det sparer databasens dataoverførsel (kvote), da tavler spørger hvert 3. sekund.
+ */
+export async function readBoardState(userId: string, since?: string | null): Promise<{ state: string | null; updatedAt: string | null; unchanged?: boolean }> {
   const profile = await ensureProfile(userId);
   if (!accountOpen(profile)) throw new Error(accountClosedMessage(profile));
   if (!canOpenBoard(profile.role)) throw new Error("Du har ikke rettigheder til at tilgå scoreboardet.");
   const sql = await getSql();
-  const rows = await sql.query<{ state: string; updated_at: string }>(
-    `select state, updated_at::text as updated_at from board_state where user_id = $1`,
-    [userId],
+  const rows = await sql.query<{ state: string | null; updated_at: string }>(
+    `select updated_at::text as updated_at,
+            case when $2::text is not null and updated_at::text = $2::text then null else state end as state
+     from board_state where user_id = $1`,
+    [userId, since || null],
   );
   if (!rows[0]) return { state: null, updatedAt: null };
+  if (since && rows[0].updated_at === since) return { state: null, updatedAt: since, unchanged: true };
   return { state: rows[0].state, updatedAt: rows[0].updated_at };
 }
 
@@ -724,8 +749,9 @@ export async function ensureOverlayKey(userId: string): Promise<string> {
   return key;
 }
 
-export async function readBoardByOverlayKey(key: string): Promise<{ state: string | null; updatedAt: string | null }> {
-  const row = await boardByOverlayKey(key);
+export async function readBoardByOverlayKey(key: string, since?: string | null): Promise<{ state: string | null; updatedAt: string | null; unchanged?: boolean }> {
+  const row = await boardByOverlayKey(key, since);
+  if (since && row.updatedAt === since) return { state: null, updatedAt: since, unchanged: true };
   return { state: row.state, updatedAt: row.updatedAt };
 }
 
@@ -780,7 +806,7 @@ function publicPlayers(raw: string | null, venueName: string) {
   };
 }
 
-async function boardByOverlayKey(key: string) {
+async function boardByOverlayKey(key: string, since?: string | null) {
   if (!/^[A-Za-z0-9_-]{20,80}$/.test(key)) throw new Error("Linket er ugyldigt.");
   const sql = await getSql();
   const rows = await sql.query<{
@@ -792,11 +818,13 @@ async function boardByOverlayKey(key: string) {
     state: string | null;
     updated_at: string | null;
   }>(
-    `select p.user_id, p.active, p.account_status, p.role, p.venue_name, b.state, b.updated_at::text as updated_at
+    `select p.user_id, p.active, p.account_status, p.role, p.venue_name,
+            case when $2::text is not null and b.updated_at::text = $2::text then null else b.state end as state,
+            b.updated_at::text as updated_at
      from profiles p
      left join board_state b on b.user_id = p.user_id
      where p.overlay_key = $1`,
-    [key],
+    [key, since || null],
   );
   const row = rows[0];
   if (!row || !row.active || normalizeAccountStatus(row.account_status) !== "approved" || !canRunLiveBoard(normalizeRole(row.role))) throw new Error("Linket er ugyldigt.");
@@ -808,8 +836,9 @@ async function boardByOverlayKey(key: string) {
   };
 }
 
-export async function readBoardJoin(key: string) {
-  const row = await boardByOverlayKey(key);
+export async function readBoardJoin(key: string, since?: string | null) {
+  const row = await boardByOverlayKey(key, since);
+  if (since && row.updatedAt === since) return { updatedAt: since, unchanged: true };
   return { updatedAt: row.updatedAt, ...publicPlayers(row.state, row.venueName) };
 }
 

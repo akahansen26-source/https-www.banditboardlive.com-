@@ -33,7 +33,7 @@ export const Route = createFileRoute("/api/streamdeck")({
           const userId = await userByToken(tokenOf(request, url));
           const a = url.searchParams.get("a");
           if (a) return json(await sendCommand(userId, a, url.searchParams.get("v") ?? "", "url"));
-          return json(await readStatus(userId, url.searchParams.get("since"), Number(url.searchParams.get("wait")) || 0));
+          return json(await readStatus(userId, url.searchParams.get("since"), Number(url.searchParams.get("wait")) || 0, url.searchParams.get("catalog") !== "0"));
         } catch (e) {
           return fail(e);
         }

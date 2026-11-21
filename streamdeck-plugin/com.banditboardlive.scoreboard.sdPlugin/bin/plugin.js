@@ -6726,7 +6726,9 @@ function kickPoll() {
 }
 async function refresh(wait) {
   const since = wait && last?.statusAt ? `&since=${encodeURIComponent(last.statusAt)}` : "";
-  last = await api(`/api/streamdeck?status=1&wait=${wait}${since}`, {}, wait + 1e4);
+  const prevCatalog = last?.catalog ?? [];
+  last = await api(`/api/streamdeck?status=1&wait=${wait}${since}${piOpen ? "" : "&catalog=0"}`, {}, wait + 1e4);
+  if (!piOpen && !last.catalog?.length) last.catalog = prevCatalog;
   lastError = "";
 }
 function ensurePolling() {

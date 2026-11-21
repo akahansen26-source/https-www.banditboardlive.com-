@@ -2939,7 +2939,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)bbActive()
 function bbSlowOk(state){const idle=Date.now()-IDLE.last;const gap=idle<IDLE.AFTER+3600000?15*60000:60*60000;if(Date.now()-(state.t||0)<gap)return false;state.t=Date.now();return true}
 
 /* ---------- automatisk opdatering: åbne tavler henter selv en ny version, når den er lagt ud ---------- */
-const BOARD_BUILD='2026-11-21-hvile';
+const BOARD_BUILD='2026-11-21-hvile-2';
 function buildWatch(){setInterval(async()=>{try{if(IDLE.sleeping)return;
   const r=await fetch('/board.html?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;
   const m=/const BOARD_BUILD='([^']+)'/.exec(await r.text());if(!m||m[1]===BOARD_BUILD)return;
@@ -3072,7 +3072,7 @@ async function pullCloud(){
   if(scheduleCloud.pending||cloudQuiet||applying) return;
   if(bbIdle()&&(!MODE||!bbSlowOk(cloudSlow))) return;
   try{
-    const r=await fetch('/api/board/state',{headers:bbHeaders(),credentials:'include',cache:'no-store'});
+    const r=await fetch('/api/board/state'+(cloudRev?'?since='+encodeURIComponent(cloudRev):''),{headers:bbHeaders(),credentials:'include',cache:'no-store'});
     if(!r.ok) return;
     const j=await r.json();
     if(!j||!j.state||!j.updatedAt||j.updatedAt===cloudRev) return;
@@ -3118,9 +3118,10 @@ async function startApp(){
     if(MODE!=='mig'&&!MODE.startsWith('profil/')){location.replace(location.pathname+location.search+'#mig');return}
     let joinRev='';
     const pullJoin=async()=>{
-      const r=await fetch('/api/board/state?spiller='+encodeURIComponent(joinKey),{cache:'no-store'});
+      const r=await fetch('/api/board/state?spiller='+encodeURIComponent(joinKey)+(joinRev?'&since='+encodeURIComponent(joinRev):''),{cache:'no-store'});
       if(!r.ok) throw new Error('bad');
       const j=await r.json();
+      if(j.unchanged) return;
       const same=j.updatedAt&&j.updatedAt===joinRev;
       joinRev=j.updatedAt||joinRev;
       S.players=Array.isArray(j.players)?j.players:[];
@@ -3151,7 +3152,7 @@ async function startApp(){
     document.body.style.pointerEvents='none';
     let obsRev='';
     const pullObs=async()=>{
-      const r=await fetch('/api/board/state?obs='+encodeURIComponent(obsKey),{cache:'no-store'});
+      const r=await fetch('/api/board/state?obs='+encodeURIComponent(obsKey)+(obsRev?'&since='+encodeURIComponent(obsRev):''),{cache:'no-store'});
       if(!r.ok) throw new Error('bad');
       const j=await r.json();
       if(j.updatedAt&&j.updatedAt===obsRev) return;
@@ -3184,7 +3185,7 @@ async function startApp(){
   const local=bindTables(load());
   let remote=null, remoteAt='';
   try{
-    const r=await fetch('/api/board/state',{headers:bbHeaders(),credentials:'include',cache:'no-store'});
+    const r=await fetch('/api/board/state'+(cloudRev?'?since='+encodeURIComponent(cloudRev):''),{headers:bbHeaders(),credentials:'include',cache:'no-store'});
     if(r.ok){const j=await r.json(); if(j&&j.state){remote=bindTables(typeof j.state==='string'?JSON.parse(j.state):j.state); remoteAt=j.updatedAt||''}}
   }catch(e){}
   const has=o=>!!(o&&((o.players&&o.players.length)||(o.history&&o.history.length)||(o.teams&&o.teams.length)||(o.tables||[]).some(t=>t.game)));
